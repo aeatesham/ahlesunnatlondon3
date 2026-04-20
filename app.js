@@ -425,12 +425,18 @@
 
   function ensureLocationNode() {
     let node = document.getElementById("locationRightPill");
+    const topbarInner = document.querySelector(".topbar-inner");
+    if (!topbarInner) return null;
+
     if (!node) {
-      node = document.createElement("div");
+      node = document.createElement("button");
+      node.type = "button";
       node.id = "locationRightPill";
       node.className = "location-right-pill";
       node.textContent = `Location: ${formatLocationLabel(getPrayerSettings())}`;
-      body.appendChild(node);
+      topbarInner.appendChild(node);
+    } else if (node.parentElement !== topbarInner) {
+      topbarInner.appendChild(node);
     }
     return node;
   }
@@ -440,6 +446,45 @@
     if (!node) return;
     const settings = getPrayerSettings();
     node.textContent = `Location: ${formatLocationLabel(settings)}`;
+  }
+
+  function initLocationQuickEdit() {
+    const node = ensureLocationNode();
+    if (!node || node.dataset.bound === "1") return;
+
+    node.dataset.bound = "1";
+    node.title = "Tap to change location";
+
+    node.addEventListener("click", () => {
+      const current = getPrayerSettings();
+      const nextCountry = window.prompt("Enter country", current.country);
+      if (nextCountry === null) return;
+
+      const nextCity = window.prompt("Enter city", current.city);
+      if (nextCity === null) return;
+
+      if (!nextCity.trim() || !nextCountry.trim()) {
+        return;
+      }
+
+      updatePrayerSettings({ city: nextCity, country: nextCountry });
+    });
+  }
+
+  function initMobileBrandText() {
+    const isMobile = window.matchMedia("(max-width: 700px)").matches;
+    document.querySelectorAll(".brand strong").forEach((node) => {
+      const original = node.dataset.original || node.textContent.trim();
+      if (!node.dataset.original) {
+        node.dataset.original = original;
+      }
+
+      if (isMobile) {
+        node.innerHTML = "AHLE SUNNAT<span class=\"brand-mobile-city\">London, ON.</span>";
+      } else {
+        node.textContent = node.dataset.original;
+      }
+    });
   }
 
   function renderPrayerCountdown() {
@@ -665,11 +710,15 @@
   window.addEventListener("DOMContentLoaded", () => {
     populateDates();
     initReveal();
+    initMobileBrandText();
     initMobileNav();
     initTransitions();
     initPrayerCountdown();
+    initLocationQuickEdit();
     initReloadAutoLocation();
     initDonationPopup();
     requestAnimationFrame(() => body.classList.add("page-ready"));
   });
+
+  window.addEventListener("resize", initMobileBrandText);
 })();

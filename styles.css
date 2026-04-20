@@ -95,9 +95,8 @@ body::after {
 }
 
 .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  position: relative;
+  z-index: 20;
   backdrop-filter: blur(12px);
   background: rgba(248, 243, 232, 0.85);
   border-bottom: 1px solid rgba(24, 47, 39, 0.1);
@@ -109,7 +108,9 @@ body::after {
   margin: 0 auto;
   padding: 9px 0 8px;
   display: flex;
-  justify-content: flex-start;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
 }
 
 .date-wrap {
@@ -117,6 +118,8 @@ body::after {
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
 .date-pill {
@@ -138,15 +141,11 @@ body::after {
 }
 
 .location-right-pill {
-  position: fixed;
-  right: 12px;
-  top: 10px;
-  z-index: 1050;
-  max-width: min(300px, calc(100vw - 24px));
+  max-width: min(340px, calc(100vw - 24px));
   padding: 7px 12px;
   border-radius: 999px;
   border: 1px solid rgba(23, 81, 65, 0.2);
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.94);
   color: var(--emerald-900);
   font-size: 0.84rem;
   font-weight: 700;
@@ -154,6 +153,15 @@ body::after {
   overflow: hidden;
   text-overflow: ellipsis;
   box-shadow: 0 8px 20px rgba(24, 40, 33, 0.14);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  appearance: none;
+}
+
+.location-right-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(24, 40, 33, 0.18);
+  border-color: rgba(191, 138, 46, 0.4);
 }
 
 .nav {
@@ -234,6 +242,10 @@ body::after {
   font-size: 1.3rem;
   letter-spacing: 0.03em;
   font-weight: 700;
+}
+
+.brand-mobile-city {
+  display: inline;
 }
 
 .nav-links {
@@ -1181,37 +1193,40 @@ body::after {
 
   .brand strong {
     white-space: normal;
+    display: block;
+    line-height: 1.05;
+    font-size: 1.02rem;
+    letter-spacing: 0.02em;
   }
 
   .brand img {
     height: 46px;
   }
 
+  .brand {
+    max-width: calc(100% - 56px);
+  }
+
+  .brand-mobile-city {
+    display: block;
+    font-size: 0.92rem;
+    margin-top: 2px;
+  }
+
   .donation-popup {
     left: 50%;
-    top: 88px;
+    top: 50%;
     bottom: auto;
-    transform: translateX(-50%);
-    animation: donationPulseMobile 2.8s ease-in-out infinite;
+    transform: translate(-50%, -50%);
+    animation: donationPulse 2.8s ease-in-out infinite;
     width: min(460px, calc(100vw - 16px));
     padding: 16px 14px 12px;
   }
 
   .location-right-pill {
-    top: 8px;
-    right: 8px;
-    max-width: calc(100vw - 16px);
+    align-self: flex-end;
+    max-width: min(86vw, 320px);
     font-size: 0.8rem;
-  }
-}
-
-@keyframes donationPulseMobile {
-  0%,
-  100% {
-    transform: translateX(-50%) translateY(0);
-  }
-  50% {
-    transform: translateX(-50%) translateY(-3px);
   }
 }
 
