@@ -1,0 +1,291 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Programmes | AHLE SUNNAT - LONDON, ON</title>
+  <meta name="description" content="Videos and posters from previous Ahle Sunnat London programmes." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-programmes">
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="date-wrap">
+          <div class="date-pill" id="englishDate">Loading...</div>
+          <div class="date-pill" id="hijriDate">Loading...</div>
+          <div class="date-pill" id="dayName">Loading...</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="brand" href="index.html">
+          <img src="logo.png" alt="Ahle Sunnat London Logo" />
+          <div>
+            <strong>AHLE SUNNAT - LONDON, ON</strong>
+          </div>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="donate.html">Donate</a>
+          <a href="programmes.html" aria-current="page">Programmes</a>
+          <a href="namaz-timings.html">Namaz Timing</a>
+          <a href="calendar.html">Monthly Calendar</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero hero-center reveal">
+        <h1>Our Programmes</h1>
+      </section>
+
+      <section class="section">
+        <div class="section-title title-box reveal">
+          <h2>Recordings</h2>
+        </div>
+        <div class="grid-3" id="videosGrid"></div>
+      </section>
+
+      <section class="section">
+        <div class="section-title title-box reveal">
+          <h2>Posters</h2>
+        </div>
+        <div class="grid-4" id="postersGrid"></div>
+      </section>
+    </main>
+
+    <footer class="footer reveal">
+      <p>© <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="programmes-data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    (function () {
+      const videosGrid = document.getElementById("videosGrid");
+      const postersGrid = document.getElementById("postersGrid");
+      const videos = Array.isArray(window.programmesVideos) ? window.programmesVideos : [];
+      const posters = Array.isArray(window.programmesPosters) ? window.programmesPosters : [];
+      let mediaModal = null;
+
+      function ensureMediaModal() {
+        if (mediaModal) return mediaModal;
+
+        mediaModal = document.createElement("div");
+        mediaModal.className = "poster-modal";
+        mediaModal.innerHTML = [
+          "<div class=\"poster-modal-inner media-modal-inner\">",
+          "  <button class=\"poster-modal-close media-modal-close\" type=\"button\" aria-label=\"Close\">&times;</button>",
+          "  <div class=\"poster-modal-image-wrap media-modal-body\">",
+          "  </div>",
+          "</div>"
+        ].join("");
+
+        const closeButton = mediaModal.querySelector(".media-modal-close");
+        const inner = mediaModal.querySelector(".media-modal-inner");
+        const body = mediaModal.querySelector(".media-modal-body");
+
+        function closeModal() {
+          const modalVideo = body.querySelector("video");
+          if (modalVideo) modalVideo.pause();
+          body.innerHTML = "";
+          mediaModal.classList.remove("show");
+        }
+
+        closeButton.addEventListener("click", closeModal);
+        mediaModal.addEventListener("click", (event) => {
+          if (!inner.contains(event.target)) {
+            closeModal();
+          }
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && mediaModal.classList.contains("show")) {
+            closeModal();
+          }
+        });
+
+        document.body.appendChild(mediaModal);
+        return mediaModal;
+      }
+
+      function openPosterModal(imageFile, title) {
+        const modal = ensureMediaModal();
+        const body = modal.querySelector(".media-modal-body");
+        body.innerHTML = "";
+
+        const image = document.createElement("img");
+        image.src = imageFile;
+        image.alt = title || "Poster preview";
+        image.className = "modal-poster-image";
+
+        body.appendChild(image);
+        modal.classList.add("show");
+      }
+
+      function openVideoModal(videoFile, title, posterFile) {
+        const modal = ensureMediaModal();
+        const body = modal.querySelector(".media-modal-body");
+        body.innerHTML = "";
+
+        const video = document.createElement("video");
+        video.className = "modal-video-player";
+        video.controls = true;
+        video.preload = "metadata";
+        video.autoplay = true;
+        if (posterFile) video.poster = posterFile;
+        video.setAttribute("playsinline", "playsinline");
+        video.title = title || "Programme recording";
+
+        const source = document.createElement("source");
+        source.src = videoFile;
+        source.type = "video/mp4";
+        video.appendChild(source);
+        video.appendChild(makeMissing("Your browser cannot play this video file."));
+
+        body.appendChild(video);
+        modal.classList.add("show");
+      }
+
+      function makeMissing(text) {
+        const node = document.createElement("div");
+        node.className = "inline-note";
+        node.style.color = "#eed8a3";
+        node.textContent = text;
+        return node;
+      }
+
+      function renderVideos() {
+        if (!videos.length) {
+          videosGrid.innerHTML = '<div class="empty-state">No videos added yet.</div>';
+          return;
+        }
+
+        videos.forEach((item) => {
+          const card = document.createElement("article");
+          card.className = "card reveal";
+
+          const frame = document.createElement("div");
+          frame.className = "media-frame";
+
+          const video = document.createElement("video");
+          video.controls = true;
+          video.preload = "metadata";
+          if (item.posterFile) video.poster = item.posterFile;
+
+          const source = document.createElement("source");
+          source.src = item.videoFile || "";
+          source.type = "video/mp4";
+
+          video.appendChild(source);
+          video.appendChild(makeMissing("Your browser cannot play this video file."));
+
+          video.addEventListener("error", () => {
+            frame.innerHTML = "";
+            frame.appendChild(makeMissing("Video file not found. Check assets/videos path."));
+          });
+
+          frame.appendChild(video);
+
+          const title = document.createElement("h3");
+          title.textContent = item.title || "Programme Video";
+
+          const meta = document.createElement("div");
+          meta.className = "meta-line";
+          meta.textContent = item.date || "Date not set";
+
+          const links = document.createElement("div");
+          links.className = "link-row";
+
+          if (item.videoFile) {
+            const playBtn = document.createElement("button");
+            playBtn.type = "button";
+            playBtn.className = "link-chip button-chip";
+            playBtn.textContent = "Play Video";
+            playBtn.addEventListener("click", () => {
+              openVideoModal(item.videoFile, item.title, item.posterFile);
+            });
+            links.appendChild(playBtn);
+          }
+
+          card.appendChild(frame);
+          card.appendChild(title);
+          card.appendChild(meta);
+          if (links.children.length) card.appendChild(links);
+          videosGrid.appendChild(card);
+        });
+      }
+
+      function renderPosters() {
+        if (!posters.length) {
+          postersGrid.innerHTML = '<div class="empty-state">No posters added yet.</div>';
+          return;
+        }
+
+        posters.forEach((item) => {
+          const card = document.createElement("article");
+          card.className = "card reveal";
+
+          const image = document.createElement("img");
+          image.className = "poster-thumb";
+          image.src = item.imageFile || "";
+          image.alt = item.title || "Programme poster";
+
+          image.addEventListener("error", () => {
+            image.src =
+              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23e8dcc3'/%3E%3Ctext x='50%25' y='48%25' font-size='26' text-anchor='middle' fill='%235e5a49' font-family='Arial'%3EPoster Not Found%3C/text%3E%3Ctext x='50%25' y='56%25' font-size='18' text-anchor='middle' fill='%235e5a49' font-family='Arial'%3ECheck file path%3C/text%3E%3C/svg%3E";
+          });
+
+          const title = document.createElement("h3");
+          title.textContent = item.title || "Programme Poster";
+
+          const meta = document.createElement("div");
+          meta.className = "meta-line";
+          meta.textContent = item.date || "Date not set";
+
+          card.appendChild(image);
+          card.appendChild(title);
+          card.appendChild(meta);
+
+          if (item.imageFile) {
+            const open = document.createElement("button");
+            open.type = "button";
+            open.className = "link-chip button-chip";
+            open.style.marginTop = "10px";
+            open.style.display = "inline-block";
+            open.textContent = "View Full Poster";
+            open.addEventListener("click", (event) => {
+              event.preventDefault();
+              openPosterModal(item.imageFile, item.title);
+            });
+            card.appendChild(open);
+          }
+
+          postersGrid.appendChild(card);
+        });
+      }
+
+      renderVideos();
+      renderPosters();
+
+      setTimeout(() => {
+        document.querySelectorAll(".reveal").forEach((item) => item.classList.add("show"));
+      }, 120);
+    })();
+  </script>
+</body>
+</html>

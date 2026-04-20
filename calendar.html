@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monthly Calendar | AHLE SUNNAT - LONDON, ON</title>
+  <meta name="description" content="Monthly Gregorian and Islamic calendar with month/year switching." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="page-calendar">
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="date-wrap">
+          <div class="date-pill" id="englishDate">Loading...</div>
+          <div class="date-pill" id="hijriDate">Loading...</div>
+          <div class="date-pill" id="dayName">Loading...</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="brand" href="index.html">
+          <img src="logo.png" alt="Ahle Sunnat London Logo" />
+          <div>
+            <strong>AHLE SUNNAT - LONDON, ON</strong>
+          </div>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="donate.html">Donate</a>
+          <a href="programmes.html">Programmes</a>
+          <a href="namaz-timings.html">Namaz Timing</a>
+          <a href="calendar.html" aria-current="page">Monthly Calendar</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero reveal">
+        <h1>Monthly Calendar</h1>
+      </section>
+
+      <section class="section">
+        <article class="card reveal">
+          <div class="calendar-controls">
+            <div class="control-group">
+              <button class="control-btn" type="button" id="prevMonth">Previous</button>
+              <button class="control-btn" type="button" id="nextMonth">Next</button>
+              <button class="control-btn" type="button" id="goToday">Today</button>
+            </div>
+
+            <div class="calendar-caption" id="calendarCaption">Loading...</div>
+
+            <div class="control-group" style="justify-content: flex-end;">
+              <select class="control-select" id="monthSelect" aria-label="Select month"></select>
+              <select class="control-select" id="yearSelect" aria-label="Select year"></select>
+            </div>
+          </div>
+
+          <div class="calendar-head" aria-hidden="true" style="margin-bottom: 8px;">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+          </div>
+
+          <div class="calendar-grid" id="calendarGrid"></div>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer reveal">
+      <p>© <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="calendar.js"></script>
+</body>
+</html>

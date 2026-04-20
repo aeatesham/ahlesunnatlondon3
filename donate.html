@@ -1,0 +1,219 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Donate | AHLE SUNNAT - LONDON, ON</title>
+  <meta name="description" content="Support Ahle Sunnat London through donation and community contribution." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .donation-card {
+      width: var(--container);
+      margin: 18px auto 24px;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: var(--white);
+      background: linear-gradient(140deg, #144736, #216953);
+      box-shadow: var(--shadow-card);
+    }
+
+    .donation-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 16%, rgba(217, 171, 85, 0.24), transparent 30%),
+        radial-gradient(circle at 84% 88%, rgba(255, 255, 255, 0.14), transparent 26%);
+    }
+
+    .donation-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .donation-card h2 {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(1.9rem, 3vw, 2.8rem);
+      margin-bottom: 10px;
+    }
+
+    .donation-card p {
+      max-width: 760px;
+      margin: 0 auto 14px;
+      line-height: 1.84;
+      color: rgba(248, 245, 236, 0.95);
+    }
+
+    .interac-box {
+      width: min(720px, 100%);
+      margin: 20px auto 14px;
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      text-align: left;
+    }
+
+    .interac-box label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 9px;
+      color: #f8e3b9;
+      letter-spacing: 0.02em;
+    }
+
+    .interac-id {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-radius: 14px;
+      padding: 14px;
+      background: rgba(0, 0, 0, 0.23);
+      border: 1px solid rgba(255, 255, 255, 0.24);
+    }
+
+    .interac-id code {
+      color: #fff1cc;
+      font-size: 0.99rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .copy-btn {
+      border: none;
+      border-radius: 11px;
+      padding: 10px 14px;
+      font-weight: 700;
+      color: #163b2f;
+      background: linear-gradient(135deg, #f0c978, #f7dfad);
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+      box-shadow: 0 9px 18px rgba(0, 0, 0, 0.18);
+    }
+
+    .copy-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .copy-status {
+      min-height: 22px;
+      margin-top: 10px;
+      color: #ffe8b7;
+      font-size: 0.93rem;
+    }
+  </style>
+</head>
+<body class="page-donate">
+  <div class="page-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="date-wrap">
+          <div class="date-pill" id="englishDate">Loading...</div>
+          <div class="date-pill" id="hijriDate">Loading...</div>
+          <div class="date-pill" id="dayName">Loading...</div>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <a class="brand" href="index.html">
+          <img src="logo.png" alt="Ahle Sunnat London Logo" />
+          <div>
+            <strong>AHLE SUNNAT - LONDON, ON</strong>
+          </div>
+        </a>
+
+        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
+          <span class="bar"></span>
+          <span class="bar"></span>
+          <span class="bar"></span>
+        </button>
+
+        <div class="nav-links">
+          <a href="index.html">Home</a>
+          <a href="donate.html" aria-current="page">Donate</a>
+          <a href="programmes.html">Programmes</a>
+          <a href="namaz-timings.html">Namaz Timing</a>
+          <a href="calendar.html">Monthly Calendar</a>
+          <a href="about.html">About</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero reveal">
+        <span class="hero-kicker">Support Our Work</span>
+        <h1>Donate to Strengthen Community Efforts</h1>
+        <p>
+          Donate to support the ongoing Ahle Sunnat community work in London.
+        </p>
+      </section>
+
+      <section class="donation-card reveal">
+        <h2>Interac e-Transfer</h2>
+        <p>You can support our organization through Interac e-Transfer using the ID below.</p>
+
+        <div class="interac-box">
+          <label for="interacText">Donation Interac ID</label>
+          <div class="interac-id">
+            <code id="interacText">AHLESUNNATLONDON@GMAIL.COM</code>
+            <button class="copy-btn" type="button" id="copyBtn">Copy ID</button>
+          </div>
+          <div class="copy-status" id="copyStatus"></div>
+        </div>
+
+        <p>Please check transfer details carefully before sending.</p>
+      </section>
+
+      <section class="section">
+        <article class="card reveal">
+          <h3>Hadith</h3>
+          <p>
+            The Messenger ﷺ said: “Charity does not decrease wealth.” (Sahih Muslim)
+          </p>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer reveal">
+      <p>© <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    (function () {
+      const copyBtn = document.getElementById("copyBtn");
+      const copyStatus = document.getElementById("copyStatus");
+      const interacText = document.getElementById("interacText");
+
+      if (!copyBtn || !copyStatus || !interacText) return;
+
+      copyBtn.addEventListener("click", async () => {
+        const text = interacText.textContent.trim();
+        try {
+          await navigator.clipboard.writeText(text);
+          copyStatus.textContent = "Interac ID copied successfully.";
+        } catch (error) {
+          copyStatus.textContent = "Could not copy automatically. Please copy it manually.";
+        }
+
+        setTimeout(() => {
+          copyStatus.textContent = "";
+        }, 2800);
+      });
+    })();
+  </script>
+</body>
+</html>
