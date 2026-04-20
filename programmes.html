@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=20260420b" />
 </head>
 <body class="page-programmes">
   <div class="page-shell">
@@ -72,8 +72,8 @@
     </footer>
   </div>
 
-  <script src="programmes-data.js"></script>
-  <script src="app.js"></script>
+  <script src="programmes-data.js?v=20260420b"></script>
+  <script src="app.js?v=20260420b"></script>
   <script>
     (function () {
       const videosGrid = document.getElementById("videosGrid");
@@ -146,7 +146,7 @@
         video.className = "modal-video-player";
         video.controls = true;
         video.preload = "metadata";
-        video.autoplay = true;
+        video.autoplay = false;
         if (posterFile) video.poster = posterFile;
         video.setAttribute("playsinline", "playsinline");
         video.title = title || "Programme recording";
@@ -156,6 +156,19 @@
         source.type = "video/mp4";
         video.appendChild(source);
         video.appendChild(makeMissing("Your browser cannot play this video file."));
+
+        video.addEventListener("error", () => {
+          body.innerHTML = "";
+          const note = makeMissing("Video could not be played on this device/browser.");
+          note.style.color = "var(--ink-700)";
+          const openLink = document.createElement("a");
+          openLink.href = videoFile;
+          openLink.className = "link-chip";
+          openLink.textContent = "Open Video File";
+          openLink.style.marginTop = "10px";
+          body.appendChild(note);
+          body.appendChild(openLink);
+        });
 
         body.appendChild(video);
         modal.classList.add("show");
@@ -182,24 +195,19 @@
           const frame = document.createElement("div");
           frame.className = "media-frame";
 
-          const video = document.createElement("video");
-          video.controls = true;
-          video.preload = "metadata";
-          if (item.posterFile) video.poster = item.posterFile;
-
-          const source = document.createElement("source");
-          source.src = item.videoFile || "";
-          source.type = "video/mp4";
-
-          video.appendChild(source);
-          video.appendChild(makeMissing("Your browser cannot play this video file."));
-
-          video.addEventListener("error", () => {
-            frame.innerHTML = "";
-            frame.appendChild(makeMissing("Video file not found. Check assets/videos path."));
-          });
-
-          frame.appendChild(video);
+          if (item.posterFile) {
+            const thumb = document.createElement("img");
+            thumb.className = "video-thumb";
+            thumb.src = item.posterFile;
+            thumb.alt = `${item.title || "Programme"} thumbnail`;
+            thumb.addEventListener("error", () => {
+              frame.innerHTML = "";
+              frame.appendChild(makeMissing("Thumbnail not found. Check poster file path."));
+            });
+            frame.appendChild(thumb);
+          } else {
+            frame.appendChild(makeMissing("Thumbnail not available."));
+          }
 
           const title = document.createElement("h3");
           title.textContent = item.title || "Programme Video";
@@ -289,3 +297,4 @@
   </script>
 </body>
 </html>
+

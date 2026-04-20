@@ -630,6 +630,13 @@ body::after {
   display: block;
 }
 
+.video-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .poster-thumb {
   width: 100%;
   aspect-ratio: 4 / 5;
@@ -901,7 +908,7 @@ body::after {
   top: 50%;
   bottom: auto;
   transform: translate(-50%, -50%);
-  z-index: 1100;
+  z-index: 2000;
   width: min(470px, calc(100vw - 24px));
   border: 1px solid rgba(217, 171, 85, 0.48);
   border-radius: 16px;
