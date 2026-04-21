@@ -1,130 +1,198 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Namaz Timing | AHLE SUNNAT - LONDON, ON</title>
-  <meta name="description" content="Daily Namaz timing with date, location, and madhab selection." />
+  <title>Namaz Timing | Ahle Sunnat London</title>
+  <meta name="description" content="View daily Namaz timings by city and country with date controls, Hanafi/Shafi options, and current prayer highlight." />
+  <meta name="theme-color" content="#145640" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Namaz Timing | Ahle Sunnat London" />
+  <meta property="og:description" content="Daily prayer timings with location and date selection, including current running prayer status." />
+  <meta property="og:url" content="https://aeatesham.github.io/ahlesunnatlondon3/namaz-timings.html" />
+  <meta property="og:image" content="https://aeatesham.github.io/ahlesunnatlondon3/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://aeatesham.github.io/ahlesunnatlondon3/namaz-timings.html" />
+  <link rel="icon" href="logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260421h" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Marcellus&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260421-premium-1" />
 </head>
 <body class="page-namaz">
-  <div class="page-shell">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="date-wrap">
-          <div class="date-pill" id="englishDate">Loading...</div>
-          <div class="date-pill" id="hijriDate">Loading...</div>
-          <div class="date-pill" id="dayName">Loading...</div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="meta-strip">
+      <div class="container">
+        <div class="meta-pills" aria-label="Today and prayer status">
+          <div class="meta-pill" id="englishDate">Loading date...</div>
+          <div class="meta-pill" id="hijriDate">Loading Hijri...</div>
+          <div class="meta-pill" id="dayName">Loading day...</div>
+          <button class="meta-pill meta-pill--location" id="locationPill" type="button" aria-label="Change location">London, Canada</button>
+          <button class="meta-pill meta-pill--countdown" id="prayerCountdown" type="button" aria-label="Open Namaz Timing page">Loading prayer countdown...</button>
         </div>
       </div>
+    </div>
 
-      <nav class="nav">
-        <a class="brand" href="index.html">
-          <img src="logo.png" alt="Ahle Sunnat London Logo" />
+    <div class="nav-wrap">
+      <div class="container nav-shell">
+        <a class="brand" href="index.html" aria-label="Ahle Sunnat London home">
+          <img src="logo.png" alt="Ahle Sunnat London logo" />
           <div>
-            <strong>AHLE SUNNAT - LONDON, ON</strong>
+            <span>Ahle Sunnat</span>
+            <small>London, ON</small>
           </div>
         </a>
 
-        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
+        <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
 
-        <div class="nav-links">
-          <a href="index.html">Home</a>
-          <a href="donate.html">Donate</a>
-          <a href="programmes.html">Programmes</a>
-          <a href="namaz-timings.html" aria-current="page">Namaz Timing</a>
-          <a href="calendar.html">Monthly Calendar</a>
-          <a href="about.html">About</a>
-          <a href="contact.html">Contact</a>
-        </div>
-      </nav>
-    </header>
+        <nav class="site-nav" id="primaryNav" aria-label="Primary navigation">
+          <a class="nav-link" href="index.html">Home</a>
+          <a class="nav-link" href="donate.html">Donate</a>
+          <a class="nav-link" href="programmes.html">Programmes</a>
+          <a class="nav-link" href="namaz-timings.html" aria-current="page">Namaz Timing</a>
+          <a class="nav-link" href="monthly-calendar.html">Monthly Calendar</a>
+          <a class="nav-link" href="about.html">About</a>
+          <a class="nav-link" href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-    <main>
-      <section class="hero reveal">
-        <h1>Namaz Timing - <span id="locationHeading">London, Ontario</span></h1>
-      </section>
+  <main id="main-content">
+    <section class="section">
+      <div class="container">
+        <article class="page-hero reveal">
+          <span class="kicker">Namaz Timing</span>
+          <h1>Daily Prayer Timings</h1>
+          <p>
+            View timings for Fajr, Sunrise, Dahwa e Kubra, Zuhr, Asr, Maghrib, and Isha based on your selected location.
+            Timings are location-based and can be checked for past and future dates.
+          </p>
+        </article>
+      </div>
+    </section>
 
-      <section class="section">
-        <article class="card reveal">
-          <div class="calendar-controls" style="margin-bottom: 10px;">
-            <div class="control-group">
-              <label for="countryInput" style="align-self: center; font-weight: 700; color: var(--emerald-900);">Country</label>
-              <input class="control-input" type="text" id="countryInput" placeholder="Enter country" autocomplete="off" />
+    <section class="section">
+      <div class="container">
+        <article class="card namaz-controls reveal">
+          <div class="controls-row">
+            <div>
+              <label class="control-label" for="countryInput">Country</label>
+              <input class="input" id="countryInput" type="text" placeholder="Canada" autocomplete="off" />
             </div>
-
-            <div class="control-group" style="justify-content: center;">
-              <label for="cityInput" style="align-self: center; font-weight: 700; color: var(--emerald-900);">City</label>
-              <input class="control-input" type="text" id="cityInput" placeholder="Enter city" autocomplete="off" />
+            <div>
+              <label class="control-label" for="cityInput">City</label>
+              <input class="input" id="cityInput" type="text" placeholder="London" autocomplete="off" />
             </div>
-
-            <div class="control-group" style="justify-content: flex-end;">
-              <button class="control-btn" type="button" id="applyLocation">Apply Location</button>
+            <div>
+              <label class="control-label sr-only" for="applyLocation">Apply location</label>
+              <button class="btn btn-primary" id="applyLocation" type="button">Apply</button>
             </div>
           </div>
 
-          <div class="calendar-controls" style="margin-bottom: 8px;">
-            <div class="control-group">
-              <button class="control-btn" type="button" id="prevDate">Previous Day</button>
-              <button class="control-btn" type="button" id="todayDate">Today</button>
-              <button class="control-btn" type="button" id="nextDate">Next Day</button>
+          <div class="controls-row" style="grid-template-columns: 1fr 220px auto auto auto;">
+            <div>
+              <label class="control-label" for="prayerDate">Selected Date</label>
+              <input class="input" id="prayerDate" type="date" />
             </div>
-
-            <div class="control-group" style="justify-content: center;">
-              <input class="control-input" type="date" id="prayerDate" style="min-width: 280px;" />
-            </div>
-
-            <div class="control-group" style="justify-content: flex-end;">
-              <label for="madhabSelect" style="align-self: center; font-weight: 700; color: var(--emerald-900);">Asr/Isha Mode</label>
-              <select class="control-select" id="madhabSelect">
+            <div>
+              <label class="control-label" for="madhabSelect">Asr / Isha Mode</label>
+              <select class="select" id="madhabSelect">
                 <option value="hanafi">Hanafi</option>
                 <option value="shafi">Shafi</option>
               </select>
             </div>
+            <div>
+              <label class="control-label sr-only" for="prevDate">Previous day</label>
+              <button class="btn btn-secondary" id="prevDate" type="button">Previous</button>
+            </div>
+            <div>
+              <label class="control-label sr-only" for="todayDate">Today</label>
+              <button class="btn btn-secondary" id="todayDate" type="button">Today</button>
+            </div>
+            <div>
+              <label class="control-label sr-only" for="nextDate">Next day</label>
+              <button class="btn btn-secondary" id="nextDate" type="button">Next</button>
+            </div>
           </div>
 
-          <p class="inline-note" id="loadMessage"></p>
+          <p class="state-message info show" id="timingsInfo">Prayer timings are loaded by selected city and country.</p>
+          <p class="state-message" id="timingsState" role="status" aria-live="polite"></p>
         </article>
-      </section>
+      </div>
+    </section>
 
-      <section class="section">
-        <article class="prayer-live reveal">
-          <strong id="liveTitle">Loading current prayer...</strong>
-          <div class="current-prayer-box" id="currentPrayerBox">Current running prayer: Loading...</div>
-          <p id="liveMeta">Please wait while timings are loaded.</p>
+    <section class="section" id="current-prayer-section">
+      <div class="container">
+        <article class="live-card reveal" id="liveCard">
+          <h3 id="liveHeading">Current Prayer Status</h3>
+          <div class="current-prayer-box" id="currentPrayerBox">Loading current prayer...</div>
+          <p class="live-meta" id="liveMeta">Loading today's location-based timings...</p>
         </article>
-      </section>
+      </div>
+    </section>
 
-      <section class="section">
-        <table class="prayer-table reveal" aria-label="Daily prayer timings table">
+    <section class="section">
+      <div class="container prayer-table-wrap reveal">
+        <table class="prayer-table" aria-label="Prayer timings table">
           <thead>
             <tr>
-              <th>Prayer</th>
-              <th>Time</th>
+              <th scope="col">Prayer</th>
+              <th scope="col">Time</th>
             </tr>
           </thead>
-          <tbody id="prayerRows"></tbody>
+          <tbody id="prayerTableBody">
+            <tr>
+              <td colspan="2">Loading timings...</td>
+            </tr>
+          </tbody>
         </table>
-      </section>
-    </main>
+      </div>
+    </section>
+  </main>
 
-    <footer class="footer reveal">
-      <p id="locationFooterNote">© <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.</p>
-    </footer>
-  </div>
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <h2>Ahle Sunnat London</h2>
+        <p>A respectful, faith-centered community platform for connection, remembrance, and sincere service.</p>
+      </div>
 
-  <script src="app.js?v=20260421h"></script>
-  <script src="namaz.js?v=20260421h"></script>
+      <div>
+        <h3 class="footer-title">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="programmes.html">Programmes</a></li>
+          <li><a href="namaz-timings.html">Namaz Timing</a></li>
+          <li><a href="monthly-calendar.html">Monthly Calendar</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-title">Support & Contact</h3>
+        <ul class="footer-links">
+          <li><a href="donate.html">Donate</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mailto:ahlesunnatlondon@gmail.com">ahlesunnatlondon@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="container footer-bottom">
+      © <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.
+    </div>
+  </footer>
+
+  <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top">↑</button>
+
+  <script src="app.js?v=20260421-premium-1" defer></script>
+  <script src="namaz.js?v=20260421-premium-1" defer></script>
 </body>
 </html>
-
-
-
-

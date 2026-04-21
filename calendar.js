@@ -1,18 +1,22 @@
-﻿(function () {
+﻿(() => {
+  "use strict";
+
   const monthSelect = document.getElementById("monthSelect");
   const yearSelect = document.getElementById("yearSelect");
-  const prevBtn = document.getElementById("prevMonth");
-  const nextBtn = document.getElementById("nextMonth");
-  const todayBtn = document.getElementById("goToday");
+  const prevButton = document.getElementById("prevMonth");
+  const nextButton = document.getElementById("nextMonth");
+  const todayButton = document.getElementById("goToday");
   const caption = document.getElementById("calendarCaption");
   const grid = document.getElementById("calendarGrid");
 
-  if (!monthSelect || !yearSelect || !prevBtn || !nextBtn || !todayBtn || !caption || !grid) return;
+  if (!monthSelect || !yearSelect || !prevButton || !nextButton || !todayButton || !caption || !grid) {
+    return;
+  }
 
-  const now = new Date();
-  let currentYear = now.getFullYear();
-  let currentMonth = now.getMonth();
-  let todayFlashTimer = null;
+  const today = new Date();
+  let activeYear = today.getFullYear();
+  let activeMonth = today.getMonth();
+  let flashTimer = null;
 
   const monthNames = [
     "January",
@@ -34,21 +38,33 @@
     month: "short"
   });
 
-  monthNames.forEach((name, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = name;
-    monthSelect.appendChild(option);
-  });
-
-  for (let year = 1900; year <= 2100; year += 1) {
-    const option = document.createElement("option");
-    option.value = String(year);
-    option.textContent = String(year);
-    yearSelect.appendChild(option);
+  function sameDate(a, b) {
+    return (
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate()
+    );
   }
 
-  function hijriLabel(date) {
+  function buildMonthOptions() {
+    monthNames.forEach((name, index) => {
+      const option = document.createElement("option");
+      option.value = String(index);
+      option.textContent = name;
+      monthSelect.appendChild(option);
+    });
+  }
+
+  function buildYearOptions() {
+    for (let year = 1900; year <= 2100; year += 1) {
+      const option = document.createElement("option");
+      option.value = String(year);
+      option.textContent = String(year);
+      yearSelect.appendChild(option);
+    }
+  }
+
+  function getHijriLabel(date) {
     try {
       const parts = hijriFormatter.formatToParts(date);
       const day = parts.find((part) => part.type === "day")?.value || "";
@@ -59,104 +75,118 @@
     }
   }
 
-  function sameDate(a, b) {
-    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-  }
-
-  function createDayCell(date, muted) {
+  function createDayCell(date, isMuted) {
     const cell = document.createElement("div");
-    cell.className = "day-cell";
-    if (muted) cell.classList.add("muted");
-    if (sameDate(date, now)) cell.classList.add("today");
+    cell.className = "calendar-day";
 
-    const gDay = document.createElement("div");
-    gDay.className = "g-day";
-    gDay.textContent = String(date.getDate());
+    if (isMuted) {
+      cell.classList.add("calendar-day--muted");
+    }
 
-    const hDay = document.createElement("div");
-    hDay.className = "h-day";
-    hDay.textContent = hijriLabel(date);
+    if (sameDate(date, today)) {
+      cell.classList.add("calendar-day--today");
+      cell.dataset.today = "1";
+    }
 
-    cell.appendChild(gDay);
-    cell.appendChild(hDay);
+    const gregNode = document.createElement("div");
+    gregNode.className = "calendar-day-greg";
+    gregNode.textContent = String(date.getDate());
+
+    const hijriNode = document.createElement("div");
+    hijriNode.className = "calendar-day-hijri";
+    hijriNode.textContent = getHijriLabel(date);
+
+    cell.appendChild(gregNode);
+    cell.appendChild(hijriNode);
+
     return cell;
   }
 
   function renderCalendar() {
     grid.innerHTML = "";
 
-    const firstOfMonth = new Date(currentYear, currentMonth, 1);
-    const lastOfMonth = new Date(currentYear, currentMonth + 1, 0);
+    const firstOfMonth = new Date(activeYear, activeMonth, 1);
+    const lastOfMonth = new Date(activeYear, activeMonth + 1, 0);
     const startDay = firstOfMonth.getDay();
     const daysInMonth = lastOfMonth.getDate();
 
-    caption.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    caption.textContent = `${monthNames[activeMonth]} ${activeYear}`;
 
-    const prevMonthLastDate = new Date(currentYear, currentMonth, 0).getDate();
+    const prevMonthLastDate = new Date(activeYear, activeMonth, 0).getDate();
     for (let i = startDay - 1; i >= 0; i -= 1) {
-      const date = new Date(currentYear, currentMonth - 1, prevMonthLastDate - i);
+      const date = new Date(activeYear, activeMonth - 1, prevMonthLastDate - i);
       grid.appendChild(createDayCell(date, true));
     }
 
     for (let day = 1; day <= daysInMonth; day += 1) {
-      const date = new Date(currentYear, currentMonth, day);
+      const date = new Date(activeYear, activeMonth, day);
       grid.appendChild(createDayCell(date, false));
     }
 
-    const cells = grid.children.length;
-    const trailing = (7 - (cells % 7)) % 7;
+    const totalCells = grid.children.length;
+    const trailing = (7 - (totalCells % 7)) % 7;
+
     for (let day = 1; day <= trailing; day += 1) {
-      const date = new Date(currentYear, currentMonth + 1, day);
+      const date = new Date(activeYear, activeMonth + 1, day);
       grid.appendChild(createDayCell(date, true));
     }
 
-    monthSelect.value = String(currentMonth);
-    yearSelect.value = String(currentYear);
+    monthSelect.value = String(activeMonth);
+    yearSelect.value = String(activeYear);
   }
 
   function flashTodayCell() {
-    const todayCell = grid.querySelector(".day-cell.today");
+    const todayCell = grid.querySelector(".calendar-day[data-today='1']");
     if (!todayCell) return;
 
-    todayCell.classList.add("flash");
-    if (todayFlashTimer) clearTimeout(todayFlashTimer);
-    todayFlashTimer = window.setTimeout(() => {
-      todayCell.classList.remove("flash");
+    todayCell.classList.add("calendar-day--flash");
+
+    if (flashTimer) {
+      clearTimeout(flashTimer);
+    }
+
+    flashTimer = window.setTimeout(() => {
+      todayCell.classList.remove("calendar-day--flash");
     }, 5000);
   }
 
   function shiftMonth(delta) {
-    currentMonth += delta;
-    if (currentMonth < 0) {
-      currentMonth = 11;
-      currentYear -= 1;
+    activeMonth += delta;
+
+    if (activeMonth < 0) {
+      activeMonth = 11;
+      activeYear -= 1;
     }
-    if (currentMonth > 11) {
-      currentMonth = 0;
-      currentYear += 1;
+
+    if (activeMonth > 11) {
+      activeMonth = 0;
+      activeYear += 1;
     }
+
     renderCalendar();
   }
 
   monthSelect.addEventListener("change", () => {
-    currentMonth = Number(monthSelect.value);
+    activeMonth = Number(monthSelect.value);
     renderCalendar();
   });
 
   yearSelect.addEventListener("change", () => {
-    currentYear = Number(yearSelect.value);
+    activeYear = Number(yearSelect.value);
     renderCalendar();
   });
 
-  prevBtn.addEventListener("click", () => shiftMonth(-1));
-  nextBtn.addEventListener("click", () => shiftMonth(1));
+  prevButton.addEventListener("click", () => shiftMonth(-1));
+  nextButton.addEventListener("click", () => shiftMonth(1));
 
-  todayBtn.addEventListener("click", () => {
-    currentYear = now.getFullYear();
-    currentMonth = now.getMonth();
+  todayButton.addEventListener("click", () => {
+    activeYear = today.getFullYear();
+    activeMonth = today.getMonth();
     renderCalendar();
     flashTodayCell();
   });
 
+  buildMonthOptions();
+  buildYearOptions();
   renderCalendar();
 })();

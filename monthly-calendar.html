@@ -3,23 +3,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Contact | Ahle Sunnat London</title>
-  <meta name="description" content="Contact Ahle Sunnat London for programmes, collaboration, and community communication." />
+  <title>Monthly Calendar | Ahle Sunnat London</title>
+  <meta name="description" content="Monthly calendar with Gregorian and Islamic dates. Move across months and years with a responsive dual-date view." />
   <meta name="theme-color" content="#145640" />
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="Contact | Ahle Sunnat London" />
-  <meta property="og:description" content="Get in touch with Ahle Sunnat London by email, Instagram, or WhatsApp community link." />
-  <meta property="og:url" content="https://aeatesham.github.io/ahlesunnatlondon3/contact.html" />
+  <meta property="og:title" content="Monthly Calendar | Ahle Sunnat London" />
+  <meta property="og:description" content="Browse Gregorian and Hijri dates by month and year in a clean responsive calendar." />
+  <meta property="og:url" content="https://aeatesham.github.io/ahlesunnatlondon3/monthly-calendar.html" />
   <meta property="og:image" content="https://aeatesham.github.io/ahlesunnatlondon3/logo.png" />
   <meta name="twitter:card" content="summary_large_image" />
-  <link rel="canonical" href="https://aeatesham.github.io/ahlesunnatlondon3/contact.html" />
+  <link rel="canonical" href="https://aeatesham.github.io/ahlesunnatlondon3/monthly-calendar.html" />
   <link rel="icon" href="logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Marcellus&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=20260421-premium-1" />
 </head>
-<body class="page-contact">
+<body class="page-calendar">
   <a class="skip-link" href="#main-content">Skip to main content</a>
 
   <header class="site-header">
@@ -56,9 +56,9 @@
           <a class="nav-link" href="donate.html">Donate</a>
           <a class="nav-link" href="programmes.html">Programmes</a>
           <a class="nav-link" href="namaz-timings.html">Namaz Timing</a>
-          <a class="nav-link" href="monthly-calendar.html">Monthly Calendar</a>
+          <a class="nav-link" href="monthly-calendar.html" aria-current="page">Monthly Calendar</a>
           <a class="nav-link" href="about.html">About</a>
-          <a class="nav-link" href="contact.html" aria-current="page">Contact</a>
+          <a class="nav-link" href="contact.html">Contact</a>
         </nav>
       </div>
     </div>
@@ -68,75 +68,39 @@
     <section class="section">
       <div class="container">
         <article class="page-hero reveal">
-          <span class="kicker">Get In Touch</span>
-          <h1>Contact Us</h1>
-          <p>
-            Reach out for programme details, community collaboration, and beneficial communication.
-            We welcome respectful interaction and meaningful participation.
-          </p>
+          <span class="kicker">Monthly Calendar</span>
+          <h1>Gregorian and Islamic Date View</h1>
+          <p>Move across any month and year. Today's date can be highlighted instantly with the Today button.</p>
         </article>
       </div>
     </section>
 
     <section class="section">
-      <div class="container contact-grid">
-        <article class="card reveal">
-          <h3>Email</h3>
-          <p><a class="inline-link" href="mailto:ahlesunnatlondon@gmail.com">ahlesunnatlondon@gmail.com</a></p>
-          <p style="margin-top: 0.4rem;">For programme enquiries, collaboration, and community support communication.</p>
-        </article>
+      <div class="container">
+        <article class="calendar-card reveal">
+          <div class="calendar-controls">
+            <button class="btn btn-secondary" id="prevMonth" type="button">Previous</button>
+            <div class="calendar-caption" id="calendarCaption">Loading...</div>
+            <button class="btn btn-secondary" id="nextMonth" type="button">Next</button>
+          </div>
 
-        <article class="card reveal">
-          <h3>Instagram</h3>
-          <p><a class="inline-link" href="https://www.instagram.com/ahlesunnat_london_ontario" target="_blank" rel="noopener noreferrer">@ahlesunnat_london_ontario</a></p>
-          <p style="margin-top: 0.4rem;">Follow updates, programme notices, and community highlights.</p>
-        </article>
+          <div class="calendar-controls" style="grid-template-columns: 1fr 1fr auto; margin-bottom: 1rem;">
+            <select class="select" id="monthSelect" aria-label="Select month"></select>
+            <select class="select" id="yearSelect" aria-label="Select year"></select>
+            <button class="btn btn-primary" id="goToday" type="button">Today</button>
+          </div>
 
-        <article class="card reveal">
-          <h3>WhatsApp Group</h3>
-          <p><a class="inline-link" href="https://chat.whatsapp.com/BErkJDTTmDwJB1dWTyNuMR" target="_blank" rel="noopener noreferrer">Join Community Group</a></p>
-          <p style="margin-top: 0.4rem;">Stay connected with regular announcements and communication.</p>
-        </article>
-      </div>
-    </section>
+          <div class="calendar-week" aria-hidden="true">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+          </div>
 
-    <section class="section">
-      <div class="container grid-2">
-        <article class="card reveal">
-          <h3>Contact Form</h3>
-          <form class="contact-form" id="contactForm" novalidate>
-            <div class="form-row">
-              <div>
-                <label class="control-label" for="contactName">Name</label>
-                <input class="input" id="contactName" name="name" type="text" required />
-              </div>
-              <div>
-                <label class="control-label" for="contactEmail">Email</label>
-                <input class="input" id="contactEmail" name="email" type="email" required />
-              </div>
-            </div>
-            <div>
-              <label class="control-label" for="contactSubject">Subject</label>
-              <input class="input" id="contactSubject" name="subject" type="text" required />
-            </div>
-            <div>
-              <label class="control-label" for="contactMessage">Message</label>
-              <textarea class="textarea" id="contactMessage" name="message" required></textarea>
-            </div>
-            <button class="btn btn-primary" type="submit">Send Message</button>
-            <div class="form-feedback" id="contactFeedback" role="status" aria-live="polite"></div>
-          </form>
-        </article>
-
-        <article class="card reveal">
-          <h3>Community Note</h3>
-          <p>
-            Ahle Sunnat London remains committed to respectful communication, practical collaboration, and sincere service.
-            We aim to keep all engagement welcoming, clear, and beneficial for the wider community.
-          </p>
-          <p style="margin-top: 0.6rem;">
-            May Allah جل جلاله unite us upon sincerity and allow our efforts to remain beneficial and accepted.
-          </p>
+          <div class="calendar-grid" id="calendarGrid" aria-live="polite"></div>
         </article>
       </div>
     </section>
@@ -178,5 +142,6 @@
   <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top">↑</button>
 
   <script src="app.js?v=20260421-premium-1" defer></script>
+  <script src="calendar.js?v=20260421-premium-1" defer></script>
 </body>
 </html>

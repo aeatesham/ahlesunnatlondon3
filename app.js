@@ -1,30 +1,35 @@
-﻿(function () {
-  const body = document.body;
-  const SETTINGS_KEY = "ahlesunnat_settings_v1";
+﻿(() => {
+  "use strict";
 
+  const SETTINGS_KEY = "asl_settings_v4";
   const DEFAULT_SETTINGS = {
     city: "London",
     country: "Canada",
-    madhab: "hanafi"
+    madhab: "hanafi",
+    manualLocation: false
   };
 
   const timingsCache = new Map();
+
   const countdownState = {
     model: null,
     timezone: "America/Toronto",
-    locationLabel: "London, Ontario",
-    currentPrayerName: "Isha",
-    settingsKey: "",
-    dateKey: "",
+    currentPrayer: "Isha",
+    currentSettingsKey: "",
+    currentDateKey: "",
     loading: false,
     hadError: false,
-    node: null,
     tickTimer: null,
-    refreshTimer: null
+    refreshTimer: null,
+    dateTimer: null
   };
 
-  function titleCaseWords(value) {
-    return String(value || "")
+  function two(value) {
+    return String(value).padStart(2, "0");
+  }
+
+  function titleCaseWords(input) {
+    return String(input || "")
       .trim()
       .replace(/\s+/g, " ")
       .split(" ")
@@ -33,8 +38,57 @@
       .join(" ");
   }
 
-  function two(value) {
-    return String(value).padStart(2, "0");
+  function normalizeMadhab(value) {
+    return String(value || "").toLowerCase() === "shafi" ? "shafi" : "hanafi";
+  }
+
+  function normalizeSettings(input) {
+    const source = input && typeof input === "object" ? input : {};
+    const city = titleCaseWords(source.city || DEFAULT_SETTINGS.city) || DEFAULT_SETTINGS.city;
+    const country = titleCaseWords(source.country || DEFAULT_SETTINGS.country) || DEFAULT_SETTINGS.country;
+    const madhab = normalizeMadhab(source.madhab);
+    const manualLocation = Boolean(source.manualLocation);
+
+    return {
+      city,
+      country,
+      madhab,
+      manualLocation
+    };
+  }
+
+  function getSettings() {
+    try {
+      const raw = window.localStorage.getItem(SETTINGS_KEY);
+      if (!raw) return { ...DEFAULT_SETTINGS };
+      return normalizeSettings(JSON.parse(raw));
+    } catch (error) {
+      return { ...DEFAULT_SETTINGS };
+    }
+  }
+
+  function writeSettings(settings) {
+    try {
+      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    } catch (error) {
+      // Ignore localStorage write failures.
+    }
+  }
+
+  function updateSettings(patch, options = {}) {
+    const current = getSettings();
+    const next = normalizeSettings({ ...current, ...(patch || {}) });
+    writeSettings(next);
+
+    if (!options.silent) {
+      window.dispatchEvent(new CustomEvent("asl:settings-change", { detail: next }));
+    }
+
+    return next;
+  }
+
+  function formatLocationLabel(settings) {
+    return `${settings.city}, ${settings.country}`;
   }
 
   function toApiDate(date) {
@@ -45,141 +99,41 @@
     return String(value || "").split(" ")[0].trim();
   }
 
-  function timeToMinutes(time) {
-    const [hours, minutes] = String(time).split(":").map(Number);
-    return hours * 60 + minutes;
+  function timeToMinutes(time24) {
+    const [h, m] = String(time24).split(":").map(Number);
+    return h * 60 + m;
   }
 
-  function minutesToTime(minutes) {
-    const normalized = ((minutes % 1440) + 1440) % 1440;
+  function minutesToTime(totalMinutes) {
+    const normalized = ((totalMinutes % 1440) + 1440) % 1440;
     const hours = Math.floor(normalized / 60);
-    const mins = normalized % 60;
-    return `${two(hours)}:${two(mins)}`;
+    const minutes = normalized % 60;
+    return `${two(hours)}:${two(minutes)}`;
+  }
+
+  function formatTime12(time24) {
+    const [h, m] = String(time24).split(":").map(Number);
+    const period = h >= 12 ? "PM" : "AM";
+    const hour12 = h % 12 || 12;
+    return `${hour12}:${two(m)} ${period}`;
   }
 
   function computeDahwa(sunrise, zuhr) {
     const sunriseMin = timeToMinutes(sunrise);
     const zuhrMin = timeToMinutes(zuhr);
-    const midpoint = sunriseMin + Math.round((zuhrMin - sunriseMin) * 0.5);
+    const midpoint = sunriseMin + Math.round((zuhrMin - sunriseMin) / 2);
     return minutesToTime(midpoint);
   }
 
-  function buildTimings(raw) {
-    const fajr = cleanTime(raw.Fajr || "05:15");
-    const sunrise = cleanTime(raw.Sunrise || "06:42");
-    const zuhr = cleanTime(raw.Dhuhr || "13:16");
-    const asr = cleanTime(raw.Asr || "16:40");
-    const maghrib = cleanTime(raw.Maghrib || "19:52");
-    const isha = cleanTime(raw.Isha || "21:12");
-
-    return {
-      Fajr: fajr,
-      Sunrise: sunrise,
-      "Dahwa e Kubra": computeDahwa(sunrise, zuhr),
-      Zuhr: zuhr,
-      Asr: asr,
-      Maghrib: maghrib,
-      Isha: isha
-    };
-  }
-
-  function normalizeSettings(input) {
-    const source = input && typeof input === "object" ? input : {};
-    const city = titleCaseWords(source.city || DEFAULT_SETTINGS.city) || DEFAULT_SETTINGS.city;
-    const country = titleCaseWords(source.country || DEFAULT_SETTINGS.country) || DEFAULT_SETTINGS.country;
-    const madhabRaw = String(source.madhab || DEFAULT_SETTINGS.madhab).toLowerCase();
-    const madhab = madhabRaw === "shafi" ? "shafi" : "hanafi";
-    return { city, country, madhab };
-  }
-
-  function readStoredSettings() {
-    try {
-      const raw = window.localStorage.getItem(SETTINGS_KEY);
-      if (!raw) return { ...DEFAULT_SETTINGS };
-      return normalizeSettings(JSON.parse(raw));
-    } catch (error) {
-      return { ...DEFAULT_SETTINGS };
+  function prayerLabel(prayerName, madhab) {
+    if (prayerName === "Asr" || prayerName === "Isha") {
+      return `${prayerName} (${madhab === "shafi" ? "Shafi" : "Hanafi"})`;
     }
-  }
-
-  function writeStoredSettings(settings) {
-    try {
-      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-    } catch (error) {
-      // Ignore write errors.
-    }
-  }
-
-  function getPrayerSettings() {
-    return readStoredSettings();
-  }
-
-  function updatePrayerSettings(patch) {
-    const next = normalizeSettings({ ...getPrayerSettings(), ...(patch || {}) });
-    writeStoredSettings(next);
-    window.dispatchEvent(new CustomEvent("prayer-settings-changed", { detail: next }));
-    return next;
-  }
-
-  function formatLocationLabel(settings) {
-    const city = settings.city.trim();
-    const country = settings.country.trim();
-    if (city.toLowerCase() === "london" && country.toLowerCase() === "canada") {
-      return "London, Ontario";
-    }
-    return `${city}, ${country}`;
-  }
-
-  function prayerLabel(name, madhab) {
-    if (name === "Asr" || name === "Isha") {
-      return `${name} (${madhab === "hanafi" ? "Hanafi" : "Shafi"})`;
-    }
-    return name;
-  }
-
-  function schoolFromMadhab(madhab) {
-    return madhab === "shafi" ? 0 : 1;
-  }
-
-  async function fetchTimingsByCity(date, settings, school) {
-    const key = `${toApiDate(date)}|${settings.city.toLowerCase()}|${settings.country.toLowerCase()}|${school}`;
-    if (timingsCache.has(key)) return timingsCache.get(key);
-
-    const endpoint = `https://api.aladhan.com/v1/timingsByCity/${toApiDate(date)}?city=${encodeURIComponent(settings.city)}&country=${encodeURIComponent(settings.country)}&method=2&school=${school}`;
-    const response = await fetch(endpoint);
-    if (!response.ok) {
-      throw new Error(`Prayer API failed with status ${response.status}`);
-    }
-
-    const payload = await response.json();
-    if (!payload || payload.code !== 200 || !payload.data || !payload.data.timings) {
-      throw new Error("Invalid prayer API response");
-    }
-
-    const result = {
-      timings: buildTimings(payload.data.timings),
-      timezone: payload.data.meta?.timezone || "America/Toronto"
-    };
-
-    timingsCache.set(key, result);
-    return result;
-  }
-
-  async function fetchCombinedTimings(date, settings) {
-    const [shafiData, hanafiData] = await Promise.all([
-      fetchTimingsByCity(date, settings, 0),
-      fetchTimingsByCity(date, settings, 1)
-    ]);
-
-    return {
-      timezone: hanafiData.timezone || shafiData.timezone || "America/Toronto",
-      shafi: { ...shafiData.timings },
-      hanafi: { ...hanafiData.timings }
-    };
+    return prayerName;
   }
 
   function getZonedParts(date, timeZone) {
-    const parts = new Intl.DateTimeFormat("en-GB", {
+    const formatter = new Intl.DateTimeFormat("en-GB", {
       timeZone,
       year: "numeric",
       month: "2-digit",
@@ -188,22 +142,24 @@
       minute: "2-digit",
       second: "2-digit",
       hour12: false
-    }).formatToParts(date);
+    });
 
-    const value = (type) => Number(parts.find((item) => item.type === type)?.value || 0);
+    const parts = formatter.formatToParts(date);
+    const pick = (type) => Number(parts.find((entry) => entry.type === type)?.value || 0);
+
     return {
-      year: value("year"),
-      month: value("month"),
-      day: value("day"),
-      hour: value("hour"),
-      minute: value("minute"),
-      second: value("second")
+      year: pick("year"),
+      month: pick("month"),
+      day: pick("day"),
+      hour: pick("hour"),
+      minute: pick("minute"),
+      second: pick("second")
     };
   }
 
   function getNowParts(timeZone) {
     try {
-      return getZonedParts(new Date(), timeZone);
+      return getZonedParts(new Date(), timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone);
     } catch (error) {
       const now = new Date();
       return {
@@ -217,12 +173,69 @@
     }
   }
 
-  function formatDuration(totalSeconds) {
-    const safe = Math.max(0, totalSeconds);
-    const hours = Math.floor(safe / 3600);
-    const minutes = Math.floor((safe % 3600) / 60);
-    const seconds = safe % 60;
-    return `${two(hours)}:${two(minutes)}:${two(seconds)}`;
+  function buildTimings(rawTimings) {
+    const fajr = cleanTime(rawTimings.Fajr);
+    const sunrise = cleanTime(rawTimings.Sunrise);
+    const zuhr = cleanTime(rawTimings.Dhuhr);
+    const asr = cleanTime(rawTimings.Asr);
+    const maghrib = cleanTime(rawTimings.Maghrib);
+    const isha = cleanTime(rawTimings.Isha);
+
+    return {
+      Fajr: fajr,
+      Sunrise: sunrise,
+      "Dahwa e Kubra": computeDahwa(sunrise, zuhr),
+      Zuhr: zuhr,
+      Asr: asr,
+      Maghrib: maghrib,
+      Isha: isha
+    };
+  }
+
+  async function fetchTimingsByCity(date, settings, school) {
+    const safeSchool = school === 0 ? 0 : 1;
+    const cacheKey = `${toApiDate(date)}|${settings.city.toLowerCase()}|${settings.country.toLowerCase()}|${safeSchool}`;
+
+    if (timingsCache.has(cacheKey)) {
+      return timingsCache.get(cacheKey);
+    }
+
+    const url = `https://api.aladhan.com/v1/timingsByCity/${toApiDate(date)}?city=${encodeURIComponent(settings.city)}&country=${encodeURIComponent(settings.country)}&method=2&school=${safeSchool}`;
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error(`Prayer API request failed (${response.status})`);
+    }
+
+    const payload = await response.json();
+    const data = payload?.data;
+
+    if (!payload || payload.code !== 200 || !data || !data.timings) {
+      throw new Error("Prayer API returned invalid data");
+    }
+
+    const model = {
+      timings: buildTimings(data.timings),
+      timezone: data.meta?.timezone || "America/Toronto",
+      hijri: data.date?.hijri || null
+    };
+
+    timingsCache.set(cacheKey, model);
+    return model;
+  }
+
+  async function fetchCombinedTimings(date, settings) {
+    const [shafiData, hanafiData] = await Promise.all([
+      fetchTimingsByCity(date, settings, 0),
+      fetchTimingsByCity(date, settings, 1)
+    ]);
+
+    return {
+      timezone: hanafiData.timezone || shafiData.timezone || "America/Toronto",
+      shafi: { ...shafiData.timings },
+      hanafi: { ...hanafiData.timings },
+      hijri: hanafiData.hijri || shafiData.hijri || null
+    };
   }
 
   function scheduleEntries(times) {
@@ -237,64 +250,68 @@
     ];
   }
 
-  function getCurrentAndNext(times, nowParts, madhab) {
-    const entries = scheduleEntries(times);
+  function getCurrentPrayerStatus(times, nowParts) {
+    const rows = scheduleEntries(times);
     const nowSeconds = nowParts.hour * 3600 + nowParts.minute * 60 + nowParts.second;
 
-    // From midnight until Fajr, keep the running period as Isha.
-    let currentName = "Isha";
-    let nextName = entries[0][0];
-    let nextMinutes = entries[0][1];
+    // Default from midnight until Fajr.
+    let current = "Isha";
+    let next = rows[0][0];
+    let nextTime = rows[0][1];
 
-    if (nowSeconds >= entries[0][1] * 60) {
-      for (let i = 0; i < entries.length; i += 1) {
-        const current = entries[i];
-        const next = entries[i + 1];
-        if (!next || (nowSeconds >= current[1] * 60 && nowSeconds < next[1] * 60)) {
-          currentName = current[0];
-          if (next) {
-            nextName = next[0];
-            nextMinutes = next[1];
-          } else {
-            nextName = entries[0][0];
-            nextMinutes = entries[0][1];
-          }
+    if (nowSeconds >= rows[0][1] * 60) {
+      for (let i = 0; i < rows.length; i += 1) {
+        const active = rows[i];
+        const following = rows[i + 1];
+
+        if (!following || (nowSeconds >= active[1] * 60 && nowSeconds < following[1] * 60)) {
+          current = active[0];
+          next = following ? following[0] : rows[0][0];
+          nextTime = following ? following[1] : rows[0][1];
           break;
         }
       }
     }
 
-    let secondsToNext = nextMinutes * 60 - nowSeconds;
-    if (secondsToNext <= 0) {
-      secondsToNext += 24 * 3600;
-    }
+    let secondsToNext = nextTime * 60 - nowSeconds;
+    if (secondsToNext <= 0) secondsToNext += 24 * 3600;
 
     return {
-      currentName,
-      nextName,
-      currentLabel: prayerLabel(currentName, madhab),
-      nextLabel: prayerLabel(nextName, madhab),
+      current,
+      next,
+      nextTime,
       secondsToNext
     };
   }
 
-  function formatEnglishDate(date) {
+  function formatDuration(totalSeconds) {
+    const safe = Math.max(0, Math.floor(totalSeconds));
+    const hours = Math.floor(safe / 3600);
+    const minutes = Math.floor((safe % 3600) / 60);
+    const seconds = safe % 60;
+    return `${two(hours)}:${two(minutes)}:${two(seconds)}`;
+  }
+
+  function formatEnglishDate(date, timeZone) {
     return new Intl.DateTimeFormat("en-CA", {
+      timeZone,
       year: "numeric",
       month: "long",
       day: "numeric"
     }).format(date);
   }
 
-  function formatDayName(date) {
+  function formatDayName(date, timeZone) {
     return new Intl.DateTimeFormat("en-CA", {
+      timeZone,
       weekday: "long"
     }).format(date);
   }
 
-  function formatHijriDate(date) {
+  function formatHijriDate(date, timeZone) {
     try {
       return new Intl.DateTimeFormat("en-GB-u-ca-islamic", {
+        timeZone,
         day: "numeric",
         month: "long",
         year: "numeric"
@@ -304,27 +321,32 @@
     }
   }
 
-  function populateDates() {
-    const today = new Date();
+  function updateDatePills() {
+    const now = new Date();
+    const tz = countdownState.timezone;
+
     const englishNode = document.getElementById("englishDate");
     const hijriNode = document.getElementById("hijriDate");
     const dayNode = document.getElementById("dayName");
 
-    if (englishNode) englishNode.textContent = formatEnglishDate(today);
-    if (hijriNode) hijriNode.textContent = formatHijriDate(today);
-    if (dayNode) dayNode.textContent = formatDayName(today);
+    if (englishNode) englishNode.textContent = formatEnglishDate(now, tz);
+    if (hijriNode) hijriNode.textContent = formatHijriDate(now, tz);
+    if (dayNode) dayNode.textContent = formatDayName(now, tz);
+  }
 
+  function updateYearText() {
+    const year = String(new Date().getFullYear());
     document.querySelectorAll(".js-year").forEach((node) => {
-      node.textContent = String(today.getFullYear());
+      node.textContent = year;
     });
   }
 
   function initReveal() {
-    const revealItems = document.querySelectorAll(".reveal");
-    if (!revealItems.length) return;
+    const nodes = document.querySelectorAll(".reveal");
+    if (!nodes.length) return;
 
     if (!("IntersectionObserver" in window)) {
-      revealItems.forEach((item) => item.classList.add("show"));
+      nodes.forEach((node) => node.classList.add("show"));
       return;
     }
 
@@ -340,296 +362,300 @@
       { threshold: 0.12 }
     );
 
-    revealItems.forEach((item) => observer.observe(item));
-  }
-
-  function initTransitions() {
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (prefersReducedMotion) return;
-
-    document.querySelectorAll("a[href]").forEach((anchor) => {
-      anchor.addEventListener("click", (event) => {
-        if (event.defaultPrevented) return;
-        if (anchor.target === "_blank") return;
-        if (anchor.hasAttribute("download")) return;
-        if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
-        const href = anchor.getAttribute("href");
-        if (!href || href.startsWith("#") || href.startsWith("mailto:") || href.startsWith("tel:")) return;
-
-        let targetUrl;
-        try {
-          targetUrl = new URL(anchor.href, window.location.href);
-        } catch (error) {
-          return;
-        }
-
-        if (targetUrl.origin !== window.location.origin) return;
-
-        const currentPath = window.location.pathname.replace(/\/$/, "");
-        const targetPath = targetUrl.pathname.replace(/\/$/, "");
-        if (currentPath === targetPath && targetUrl.hash) return;
-
-        event.preventDefault();
-        body.classList.add("page-leave");
-        window.setTimeout(() => {
-          window.location.href = targetUrl.href;
-        }, 190);
-      });
-    });
+    nodes.forEach((node) => observer.observe(node));
   }
 
   function initMobileNav() {
-    document.querySelectorAll(".nav").forEach((nav) => {
-      const toggle = nav.querySelector(".nav-toggle");
-      const linksWrap = nav.querySelector(".nav-links");
-      if (!toggle || !linksWrap) return;
+    const toggle = document.getElementById("navToggle");
+    const nav = document.getElementById("primaryNav");
+    if (!toggle || !nav) return;
 
-      const closeMenu = () => {
-        nav.classList.remove("nav-open");
-        toggle.setAttribute("aria-expanded", "false");
-      };
+    function closeMenu() {
+      nav.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
 
-      toggle.addEventListener("click", () => {
-        const willOpen = !nav.classList.contains("nav-open");
-        nav.classList.toggle("nav-open", willOpen);
-        toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
-      });
+    toggle.addEventListener("click", () => {
+      const willOpen = !nav.classList.contains("open");
+      nav.classList.toggle("open", willOpen);
+      toggle.setAttribute("aria-expanded", willOpen ? "true" : "false");
+    });
 
-      linksWrap.querySelectorAll("a").forEach((link) => {
-        link.addEventListener("click", closeMenu);
-      });
+    nav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", closeMenu);
+    });
 
-      window.addEventListener("resize", () => {
-        if (window.innerWidth > 980) {
-          closeMenu();
-        }
-      });
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 960) closeMenu();
     });
   }
 
-  function ensureCountdownNode() {
-    if (countdownState.node) return countdownState.node;
-    const dateWrap = document.querySelector(".date-wrap");
-    if (!dateWrap) return null;
+  function setActiveNavLink() {
+    const path = window.location.pathname.split("/").pop() || "index.html";
+    document.querySelectorAll(".nav-link").forEach((link) => {
+      const href = link.getAttribute("href");
+      if (!href) return;
 
-    let node = document.getElementById("prayerCountdown");
-    if (!node) {
-      node = document.createElement("button");
-      node.type = "button";
-      node.id = "prayerCountdown";
-      node.className = "date-pill prayer-countdown";
-      node.title = "Open Namaz Timing";
-      node.textContent = "Loading prayer countdown...";
-      dateWrap.appendChild(node);
-    } else if (node.parentElement !== dateWrap) {
-      dateWrap.appendChild(node);
-    }
-
-    countdownState.node = node;
-    return node;
+      const normalizedHref = href.split("/").pop();
+      if (normalizedHref === path) {
+        link.setAttribute("aria-current", "page");
+      } else if (link.getAttribute("aria-current") === "page") {
+        link.removeAttribute("aria-current");
+      }
+    });
   }
 
-  function ensureLocationNode() {
-    let node = document.getElementById("locationPill");
-    const dateWrap = document.querySelector(".date-wrap");
-    if (!dateWrap) return null;
-    const countdownNode = ensureCountdownNode();
+  function initBackToTop() {
+    const button = document.getElementById("backToTop");
+    if (!button) return;
 
-    if (!node) {
-      node = document.createElement("button");
-      node.type = "button";
-      node.id = "locationPill";
-      node.className = "date-pill location-pill";
-      node.textContent = `${formatLocationLabel(getPrayerSettings())}`;
-      if (countdownNode && countdownNode.parentElement === dateWrap) {
-        dateWrap.insertBefore(node, countdownNode);
+    function onScroll() {
+      if (window.scrollY > 280) {
+        button.classList.add("show");
       } else {
-        dateWrap.appendChild(node);
-      }
-    } else if (node.parentElement !== dateWrap) {
-      if (countdownNode && countdownNode.parentElement === dateWrap) {
-        dateWrap.insertBefore(node, countdownNode);
-      } else {
-        dateWrap.appendChild(node);
+        button.classList.remove("show");
       }
     }
-    return node;
+
+    button.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
   }
 
-  function updateLocationNode() {
-    const node = ensureLocationNode();
+  function getLocationPill() {
+    return document.getElementById("locationPill");
+  }
+
+  function getCountdownPill() {
+    return document.getElementById("prayerCountdown");
+  }
+
+  function renderLocationPill() {
+    const node = getLocationPill();
     if (!node) return;
-    const settings = getPrayerSettings();
-    node.textContent = `${formatLocationLabel(settings)}`;
+    node.textContent = formatLocationLabel(getSettings());
   }
 
-  function initLocationQuickEdit() {
-    const node = ensureLocationNode();
-    if (!node || node.dataset.bound === "1") return;
+  function openLocationPrompt() {
+    const current = getSettings();
+    const nextCountry = window.prompt("Enter country", current.country);
+    if (nextCountry === null) return;
 
-    node.dataset.bound = "1";
-    node.title = "Tap to change location";
+    const nextCity = window.prompt("Enter city", current.city);
+    if (nextCity === null) return;
 
-    node.addEventListener("click", () => {
-      const current = getPrayerSettings();
-      const nextCountry = window.prompt("Enter country", current.country);
-      if (nextCountry === null) return;
+    if (!nextCity.trim() || !nextCountry.trim()) return;
 
-      const nextCity = window.prompt("Enter city", current.city);
-      if (nextCity === null) return;
-
-      if (!nextCity.trim() || !nextCountry.trim()) {
-        return;
-      }
-
-      updatePrayerSettings({ city: nextCity, country: nextCountry });
-    });
+    updateSettings(
+      {
+        city: nextCity,
+        country: nextCountry,
+        manualLocation: true
+      },
+      { silent: false }
+    );
   }
 
-  function focusRunningPrayerInNamazPage() {
-    const prayer = countdownState.currentPrayerName || "Isha";
-    window.dispatchEvent(new CustomEvent("focus-current-prayer", { detail: { prayer } }));
-  }
+  function openNamazFromCountdown() {
+    const prayer = countdownState.currentPrayer || "Isha";
 
-  function openNamazTimingFromCountdown() {
-    const prayer = countdownState.currentPrayerName || "Isha";
-
-    if (body.classList.contains("page-namaz")) {
-      focusRunningPrayerInNamazPage();
+    if (document.body.classList.contains("page-namaz")) {
+      window.dispatchEvent(new CustomEvent("asl:focus-current-prayer", { detail: { prayer } }));
       return;
     }
 
-    const targetUrl = new URL("namaz-timings.html", window.location.href);
-    targetUrl.searchParams.set("focus", prayer);
-    targetUrl.searchParams.set("from", "header");
-
-    body.classList.add("page-leave");
-    window.setTimeout(() => {
-      window.location.href = targetUrl.href;
-    }, 170);
+    const target = new URL("namaz-timings.html", window.location.href);
+    target.searchParams.set("focus", prayer);
+    target.hash = "current-prayer-section";
+    window.location.href = target.toString();
   }
 
-  function initMobileBrandText() {
-    const isMobile = window.matchMedia("(max-width: 700px)").matches;
-    document.querySelectorAll(".brand strong").forEach((node) => {
-      const original = node.dataset.original || node.textContent.trim();
-      if (!node.dataset.original) {
-        node.dataset.original = original;
-      }
+  function bindHeaderActions() {
+    const locationPill = getLocationPill();
+    const countdownPill = getCountdownPill();
 
-      if (isMobile) {
-        node.innerHTML = "AHLE SUNNAT<span class=\"brand-mobile-city\">London, ON.</span>";
-      } else {
-        node.textContent = node.dataset.original;
-      }
-    });
+    if (locationPill && locationPill.dataset.bound !== "1") {
+      locationPill.dataset.bound = "1";
+      locationPill.addEventListener("click", openLocationPrompt);
+    }
+
+    if (countdownPill && countdownPill.dataset.bound !== "1") {
+      countdownPill.dataset.bound = "1";
+      countdownPill.addEventListener("click", openNamazFromCountdown);
+    }
   }
 
-  function renderPrayerCountdown() {
-    const node = ensureCountdownNode();
-    if (!node) return;
-
-    if (!countdownState.model) {
-      node.textContent = countdownState.hadError ? "Namaz countdown unavailable" : "Loading prayer countdown...";
-      return;
-    }
-
-    const settings = getPrayerSettings();
-    const nowParts = getNowParts(countdownState.timezone);
-    const dateKey = `${nowParts.year}-${two(nowParts.month)}-${two(nowParts.day)}`;
-
-    if (dateKey !== countdownState.dateKey) {
-      refreshCountdownModel(true);
-    }
-
-    const activeTimings = settings.madhab === "shafi" ? countdownState.model.shafi : countdownState.model.hanafi;
-    const status = getCurrentAndNext(activeTimings, nowParts, settings.madhab);
-    countdownState.currentPrayerName = status.currentName;
-
-    node.textContent = `Now: ${status.currentLabel} | Next: ${status.nextLabel} in ${formatDuration(status.secondsToNext)}`;
-  }
-
-  async function refreshCountdownModel(force) {
-    const settings = getPrayerSettings();
-    const settingsKey = `${settings.city.toLowerCase()}|${settings.country.toLowerCase()}|${settings.madhab}`;
-    const locationLabel = formatLocationLabel(settings);
-
-    const nowForZone = getNowParts(countdownState.timezone);
-    const requestDate = new Date(nowForZone.year, nowForZone.month - 1, nowForZone.day);
-    const dateKey = `${nowForZone.year}-${two(nowForZone.month)}-${two(nowForZone.day)}`;
-
-    if (!force && countdownState.model && countdownState.settingsKey === settingsKey && countdownState.dateKey === dateKey) {
-      countdownState.locationLabel = locationLabel;
-      return;
-    }
-
+  async function refreshCountdownModel(force = false) {
     if (countdownState.loading) return;
+
+    const settings = getSettings();
+    const settingsKey = `${settings.city.toLowerCase()}|${settings.country.toLowerCase()}|${settings.madhab}`;
+
+    const nowInZone = getNowParts(countdownState.timezone);
+    const requestDate = new Date(nowInZone.year, nowInZone.month - 1, nowInZone.day);
+    const dateKey = `${nowInZone.year}-${two(nowInZone.month)}-${two(nowInZone.day)}`;
+
+    if (
+      !force &&
+      countdownState.model &&
+      countdownState.currentSettingsKey === settingsKey &&
+      countdownState.currentDateKey === dateKey
+    ) {
+      return;
+    }
+
     countdownState.loading = true;
 
     try {
-      const combined = await fetchCombinedTimings(requestDate, settings);
-      countdownState.model = combined;
-      countdownState.timezone = combined.timezone;
-      countdownState.settingsKey = settingsKey;
-      countdownState.dateKey = dateKey;
-      countdownState.locationLabel = locationLabel;
+      const model = await fetchCombinedTimings(requestDate, settings);
+      countdownState.model = model;
+      countdownState.timezone = model.timezone;
+      countdownState.currentSettingsKey = settingsKey;
+      countdownState.currentDateKey = dateKey;
       countdownState.hadError = false;
     } catch (error) {
       countdownState.model = null;
       countdownState.hadError = true;
-      countdownState.locationLabel = locationLabel;
     } finally {
       countdownState.loading = false;
-      updateLocationNode();
-      renderPrayerCountdown();
+      updateDatePills();
+      renderLocationPill();
+      renderCountdownPill();
     }
   }
 
-  function initPrayerCountdown() {
-    const node = ensureCountdownNode();
+  function renderCountdownPill() {
+    const node = getCountdownPill();
     if (!node) return;
 
-    if (node.dataset.boundNav !== "1") {
-      node.dataset.boundNav = "1";
-      node.addEventListener("click", openNamazTimingFromCountdown);
+    if (!countdownState.model) {
+      node.textContent = countdownState.hadError ? "Prayer timings unavailable" : "Loading prayer countdown...";
+      return;
     }
 
-    refreshCountdownModel(true);
-    updateLocationNode();
+    const settings = getSettings();
+    const active = settings.madhab === "shafi" ? countdownState.model.shafi : countdownState.model.hanafi;
+    const nowParts = getNowParts(countdownState.timezone);
+    const status = getCurrentPrayerStatus(active, nowParts);
 
+    countdownState.currentPrayer = status.current;
+
+    node.textContent = `Now: ${prayerLabel(status.current, settings.madhab)} | Next: ${prayerLabel(status.next, settings.madhab)} in ${formatDuration(status.secondsToNext)}`;
+  }
+
+  function startCountdownLoop() {
     if (countdownState.tickTimer) clearInterval(countdownState.tickTimer);
     if (countdownState.refreshTimer) clearInterval(countdownState.refreshTimer);
+    if (countdownState.dateTimer) clearInterval(countdownState.dateTimer);
 
-    countdownState.tickTimer = window.setInterval(renderPrayerCountdown, 1000);
+    countdownState.tickTimer = window.setInterval(renderCountdownPill, 1000);
     countdownState.refreshTimer = window.setInterval(() => refreshCountdownModel(false), 45000);
+    countdownState.dateTimer = window.setInterval(updateDatePills, 60000);
+  }
 
-    window.addEventListener("prayer-settings-changed", () => {
-      updateLocationNode();
-      refreshCountdownModel(true);
-    });
+  function initContactFormPlaceholder() {
+    const form = document.getElementById("contactForm");
+    const feedback = document.getElementById("contactFeedback");
+    if (!form || !feedback) return;
 
-    window.addEventListener("storage", (event) => {
-      if (event.key === SETTINGS_KEY) {
-        updateLocationNode();
-        refreshCountdownModel(true);
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      if (!form.checkValidity()) {
+        feedback.className = "form-feedback error show";
+        feedback.textContent = "Please complete all required fields before submitting.";
+        return;
       }
+
+      feedback.className = "form-feedback success show";
+      feedback.textContent = "Message draft captured. This form is currently front-end only and ready for backend integration.";
+      form.reset();
     });
   }
 
-  function navigationType() {
-    const entry = window.performance && window.performance.getEntriesByType
-      ? window.performance.getEntriesByType("navigation")[0]
-      : null;
-    if (entry && entry.type) return entry.type;
-    return "navigate";
+  function initDonateCopyButton() {
+    const button = document.getElementById("copyDonateEmail");
+    const codeNode = document.getElementById("donateEmailText");
+    const feedback = document.getElementById("copyDonateFeedback");
+
+    if (!button || !codeNode || !feedback) return;
+
+    button.addEventListener("click", async () => {
+      const value = codeNode.textContent.trim();
+
+      try {
+        await navigator.clipboard.writeText(value);
+        feedback.textContent = "Donation email copied successfully.";
+      } catch (error) {
+        feedback.textContent = "Could not copy automatically. Please copy manually.";
+      }
+
+      window.setTimeout(() => {
+        feedback.textContent = "";
+      }, 2800);
+    });
   }
 
-  async function reverseGeocodeLocation(latitude, longitude) {
+  function createDonationPopup() {
+    if (document.getElementById("donationPopup")) return;
+
+    const popup = document.createElement("aside");
+    popup.id = "donationPopup";
+    popup.className = "donation-popup";
+    popup.setAttribute("aria-label", "Donation quick action");
+    popup.innerHTML = [
+      "<h4>Support Ahle Sunnat London</h4>",
+      "<p>Interac e-Transfer donation email</p>",
+      '<div class="popup-email" id="popupDonateEmail">AHLESUNNATLONDON@GMAIL.COM</div>',
+      '<div class="popup-actions">',
+      '  <button class="popup-copy" id="popupDonateCopy" type="button">Copy Email</button>',
+      '  <button class="popup-close" id="popupDonateClose" type="button" aria-label="Close donation popup">×</button>',
+      "</div>",
+      '<div class="popup-feedback" id="popupDonateFeedback" aria-live="polite"></div>'
+    ].join("");
+
+    document.body.appendChild(popup);
+
+    const copyButton = document.getElementById("popupDonateCopy");
+    const closeButton = document.getElementById("popupDonateClose");
+    const emailNode = document.getElementById("popupDonateEmail");
+    const feedbackNode = document.getElementById("popupDonateFeedback");
+
+    if (copyButton && emailNode && feedbackNode) {
+      copyButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(emailNode.textContent.trim());
+          feedbackNode.textContent = "Donation email copied.";
+        } catch (error) {
+          feedbackNode.textContent = "Copy failed. Please copy manually.";
+        }
+
+        window.setTimeout(() => {
+          feedbackNode.textContent = "";
+        }, 2400);
+      });
+    }
+
+    if (closeButton) {
+      closeButton.addEventListener("click", () => {
+        popup.classList.add("hidden");
+      });
+    }
+  }
+
+  function initDonationPopup() {
+    createDonationPopup();
+  }
+
+  async function reverseGeocode(latitude, longitude) {
     const endpoint = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&localityLanguage=en`;
     const response = await fetch(endpoint);
+
     if (!response.ok) {
-      throw new Error(`Reverse geocode failed (${response.status})`);
+      throw new Error(`Reverse geocoding failed (${response.status})`);
     }
 
     const payload = await response.json();
@@ -645,38 +671,46 @@
     const country = titleCaseWords(countryRaw);
 
     if (!city || !country) {
-      throw new Error("Incomplete reverse geocode response");
+      throw new Error("Could not detect city/country from current location");
     }
 
     return { city, country };
   }
 
-  function initReloadAutoLocation() {
-    if (navigationType() !== "reload") return;
+  function maybeAutoLocate() {
+    const current = getSettings();
+
+    if (current.manualLocation) return;
     if (!("geolocation" in navigator)) return;
     if (!window.isSecureContext) return;
 
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         try {
-          const { latitude, longitude } = position.coords;
-          const liveLocation = await reverseGeocodeLocation(latitude, longitude);
-          const current = getPrayerSettings();
+          const live = await reverseGeocode(position.coords.latitude, position.coords.longitude);
+          const nowSettings = getSettings();
 
           if (
-            current.city.toLowerCase() === liveLocation.city.toLowerCase() &&
-            current.country.toLowerCase() === liveLocation.country.toLowerCase()
+            nowSettings.city.toLowerCase() === live.city.toLowerCase() &&
+            nowSettings.country.toLowerCase() === live.country.toLowerCase()
           ) {
             return;
           }
 
-          updatePrayerSettings({ city: liveLocation.city, country: liveLocation.country });
+          updateSettings(
+            {
+              city: live.city,
+              country: live.country,
+              manualLocation: false
+            },
+            { silent: false }
+          );
         } catch (error) {
-          // Keep existing saved location if reverse geocode fails.
+          // Keep default/saved location silently.
         }
       },
       () => {
-        // Keep existing saved location if user denies permission.
+        // User denied permission or unavailable. Keep saved location.
       },
       {
         enableHighAccuracy: false,
@@ -686,86 +720,67 @@
     );
   }
 
-  function initDonationPopup() {
-    // Show on Home loads, and on reload for every page.
-    const navType = navigationType();
-    if (!body.classList.contains("page-home") && navType !== "reload") return;
-    if (document.getElementById("donationPopup")) return;
+  function bindGlobalEvents() {
+    window.addEventListener("asl:settings-change", () => {
+      renderLocationPill();
+      refreshCountdownModel(true);
+    });
 
-    const popup = document.createElement("aside");
-    popup.id = "donationPopup";
-    popup.className = "donation-popup";
-
-    popup.innerHTML = [
-      "<h4>Support Our Work</h4>",
-      "<p>Interac e-Transfer donation ID</p>",
-      "<code class=\"popup-id\" id=\"popupInterac\">AHLESUNNATLONDON@GMAIL.COM</code>",
-      "<div class=\"popup-actions\">",
-      "  <button class=\"popup-copy\" type=\"button\" id=\"popupCopy\">Copy ID</button>",
-      "  <button class=\"popup-close\" type=\"button\" id=\"popupClose\" aria-label=\"Close\">&times;</button>",
-      "</div>",
-      "<div class=\"popup-status\" id=\"popupStatus\"></div>"
-    ].join("");
-
-    body.appendChild(popup);
-
-    const codeNode = document.getElementById("popupInterac");
-    const statusNode = document.getElementById("popupStatus");
-    const copyBtn = document.getElementById("popupCopy");
-    const closeBtn = document.getElementById("popupClose");
-
-    if (copyBtn && codeNode && statusNode) {
-      copyBtn.addEventListener("click", async () => {
-        try {
-          await navigator.clipboard.writeText(codeNode.textContent.trim());
-          statusNode.textContent = "Interac ID copied.";
-        } catch (error) {
-          statusNode.textContent = "Copy failed. Please copy manually.";
-        }
-
-        window.setTimeout(() => {
-          statusNode.textContent = "";
-        }, 2500);
-      });
-    }
-
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        popup.classList.add("hidden");
-      });
-    }
+    window.addEventListener("storage", (event) => {
+      if (event.key === SETTINGS_KEY) {
+        renderLocationPill();
+        refreshCountdownModel(true);
+      }
+    });
   }
 
-  window.SiteUtils = {
-    formatEnglishDate,
-    formatHijriDate,
-    formatDayName
-  };
+  function init() {
+    updateYearText();
+    updateDatePills();
+    renderLocationPill();
+
+    setActiveNavLink();
+    initMobileNav();
+    initReveal();
+    initBackToTop();
+    initContactFormPlaceholder();
+    initDonateCopyButton();
+    initDonationPopup();
+
+    bindHeaderActions();
+    bindGlobalEvents();
+    maybeAutoLocate();
+
+    refreshCountdownModel(true);
+    startCountdownLoop();
+
+    window.requestAnimationFrame(() => {
+      document.body.classList.add("page-ready");
+    });
+  }
 
   window.PrayerPrefs = {
-    getSettings: getPrayerSettings,
-    updateSettings: updatePrayerSettings,
-    defaults: { ...DEFAULT_SETTINGS },
+    getSettings,
+    updateSettings,
+    normalizeSettings,
     formatLocationLabel,
     prayerLabel,
-    schoolFromMadhab,
     fetchTimingsByCity,
     fetchCombinedTimings,
-    getNowParts
+    getNowParts,
+    formatTime12
   };
 
-  window.addEventListener("DOMContentLoaded", () => {
-    populateDates();
-    initReveal();
-    initMobileBrandText();
-    initMobileNav();
-    initTransitions();
-    initPrayerCountdown();
-    initLocationQuickEdit();
-    initReloadAutoLocation();
-    initDonationPopup();
-    requestAnimationFrame(() => body.classList.add("page-ready"));
-  });
+  window.ASLSite = {
+    getSettings,
+    updateSettings,
+    formatLocationLabel,
+    prayerLabel,
+    formatTime12,
+    getNowParts,
+    getCurrentPrayerStatus,
+    fetchCombinedTimings
+  };
 
-  window.addEventListener("resize", initMobileBrandText);
+  window.addEventListener("DOMContentLoaded", init);
 })();

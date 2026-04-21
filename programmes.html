@@ -1,316 +1,171 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Programmes | AHLE SUNNAT - LONDON, ON</title>
-  <meta name="description" content="Videos and posters from previous Ahle Sunnat London programmes." />
+  <title>Programmes | Ahle Sunnat London</title>
+  <meta name="description" content="Browse Ahle Sunnat London recordings, programme posters, upcoming plans, and previous events in one organized archive." />
+  <meta name="theme-color" content="#145640" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Programmes | Ahle Sunnat London" />
+  <meta property="og:description" content="Explore programme recordings and posters from Ahle Sunnat London events." />
+  <meta property="og:url" content="https://aeatesham.github.io/ahlesunnatlondon3/programmes.html" />
+  <meta property="og:image" content="https://aeatesham.github.io/ahlesunnatlondon3/logo.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link rel="canonical" href="https://aeatesham.github.io/ahlesunnatlondon3/programmes.html" />
+  <link rel="icon" href="logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=20260421h" />
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Marcellus&family=Noto+Naskh+Arabic:wght@500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css?v=20260421-premium-1" />
 </head>
 <body class="page-programmes">
-  <div class="page-shell">
-    <header class="topbar">
-      <div class="topbar-inner">
-        <div class="date-wrap">
-          <div class="date-pill" id="englishDate">Loading...</div>
-          <div class="date-pill" id="hijriDate">Loading...</div>
-          <div class="date-pill" id="dayName">Loading...</div>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <header class="site-header">
+    <div class="meta-strip">
+      <div class="container">
+        <div class="meta-pills" aria-label="Today and prayer status">
+          <div class="meta-pill" id="englishDate">Loading date...</div>
+          <div class="meta-pill" id="hijriDate">Loading Hijri...</div>
+          <div class="meta-pill" id="dayName">Loading day...</div>
+          <button class="meta-pill meta-pill--location" id="locationPill" type="button" aria-label="Change location">London, Canada</button>
+          <button class="meta-pill meta-pill--countdown" id="prayerCountdown" type="button" aria-label="Open Namaz Timing page">Loading prayer countdown...</button>
         </div>
       </div>
+    </div>
 
-      <nav class="nav">
-        <a class="brand" href="index.html">
-          <img src="logo.png" alt="Ahle Sunnat London Logo" />
+    <div class="nav-wrap">
+      <div class="container nav-shell">
+        <a class="brand" href="index.html" aria-label="Ahle Sunnat London home">
+          <img src="logo.png" alt="Ahle Sunnat London logo" />
           <div>
-            <strong>AHLE SUNNAT - LONDON, ON</strong>
+            <span>Ahle Sunnat</span>
+            <small>London, ON</small>
           </div>
         </a>
 
-        <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false">
-          <span class="bar"></span>
-          <span class="bar"></span>
-          <span class="bar"></span>
+        <button class="nav-toggle" type="button" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Open menu">
+          <span></span>
+          <span></span>
+          <span></span>
         </button>
 
-        <div class="nav-links">
-          <a href="index.html">Home</a>
-          <a href="donate.html">Donate</a>
-          <a href="programmes.html" aria-current="page">Programmes</a>
-          <a href="namaz-timings.html">Namaz Timing</a>
-          <a href="calendar.html">Monthly Calendar</a>
-          <a href="about.html">About</a>
-          <a href="contact.html">Contact</a>
-        </div>
-      </nav>
-    </header>
+        <nav class="site-nav" id="primaryNav" aria-label="Primary navigation">
+          <a class="nav-link" href="index.html">Home</a>
+          <a class="nav-link" href="donate.html">Donate</a>
+          <a class="nav-link" href="programmes.html" aria-current="page">Programmes</a>
+          <a class="nav-link" href="namaz-timings.html">Namaz Timing</a>
+          <a class="nav-link" href="monthly-calendar.html">Monthly Calendar</a>
+          <a class="nav-link" href="about.html">About</a>
+          <a class="nav-link" href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </div>
+  </header>
 
-    <main>
-      <section class="hero hero-center reveal">
-        <h1>Our Programmes</h1>
-      </section>
+  <main id="main-content">
+    <section class="section">
+      <div class="container">
+        <article class="page-hero reveal">
+          <span class="kicker">Programmes Archive</span>
+          <h1>Recordings & Posters</h1>
+          <p>
+            Browse selected event recordings, invitations, and organized programme history from Ahle Sunnat London community activities.
+          </p>
+        </article>
+      </div>
+    </section>
 
-      <section class="section">
-        <div class="section-title title-box reveal">
-          <h2>Recordings</h2>
-        </div>
-        <div class="grid-3" id="videosGrid"></div>
-      </section>
+    <section class="section">
+      <div class="container">
+        <header class="section-head reveal card" style="margin-bottom: 1rem;">
+          <span class="kicker">Recordings</span>
+          <h2>Programme Videos</h2>
+          <p>Watch community programme recordings directly on this page.</p>
+        </header>
+        <div class="programme-grid" id="recordingsGrid" aria-live="polite"></div>
+      </div>
+    </section>
 
-      <section class="section">
-        <div class="section-title title-box reveal">
-          <h2>Posters</h2>
-        </div>
-        <div class="grid-4" id="postersGrid"></div>
-      </section>
-    </main>
+    <section class="section">
+      <div class="container">
+        <header class="section-head reveal card" style="margin-bottom: 1rem;">
+          <span class="kicker">Posters</span>
+          <h2>Programme Posters</h2>
+          <p>Open each poster in a smooth full-screen viewer without leaving this page.</p>
+        </header>
+        <div class="poster-grid" id="postersGrid" aria-live="polite"></div>
+      </div>
+    </section>
 
-    <footer class="footer reveal">
-      <p>© <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.</p>
-    </footer>
+    <section class="section">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="kicker">Upcoming</span>
+          <h2>Upcoming Programmes</h2>
+          <p>Plans can be updated as announcements are confirmed.</p>
+        </header>
+        <div class="upcoming-grid" id="upcomingGrid"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <header class="section-head reveal">
+          <span class="kicker">History</span>
+          <h2>Previous Events</h2>
+          <p>A quick timeline of key programmes already organized by the community.</p>
+        </header>
+        <div class="timeline" id="previousTimeline"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="media-modal" id="mediaModal" aria-hidden="true" role="dialog" aria-label="Media viewer">
+    <div class="media-modal-card">
+      <button class="media-modal-close" id="mediaModalClose" type="button" aria-label="Close media viewer">×</button>
+      <div class="media-modal-body" id="mediaModalBody"></div>
+    </div>
   </div>
 
-  <script src="programmes-data.js?v=20260421h"></script>
-  <script src="app.js?v=20260421h"></script>
-  <script>
-    (function () {
-      const videosGrid = document.getElementById("videosGrid");
-      const postersGrid = document.getElementById("postersGrid");
-      const videos = Array.isArray(window.programmesVideos) ? window.programmesVideos : [];
-      const posters = Array.isArray(window.programmesPosters) ? window.programmesPosters : [];
-      let mediaModal = null;
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <h2>Ahle Sunnat London</h2>
+        <p>A respectful, faith-centered community platform for connection, remembrance, and sincere service.</p>
+      </div>
 
-      function ensureMediaModal() {
-        if (mediaModal) return mediaModal;
+      <div>
+        <h3 class="footer-title">Quick Links</h3>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="programmes.html">Programmes</a></li>
+          <li><a href="namaz-timings.html">Namaz Timing</a></li>
+          <li><a href="monthly-calendar.html">Monthly Calendar</a></li>
+        </ul>
+      </div>
 
-        mediaModal = document.createElement("div");
-        mediaModal.className = "poster-modal";
-        mediaModal.innerHTML = [
-          "<div class=\"poster-modal-inner media-modal-inner\">",
-          "  <button class=\"poster-modal-close media-modal-close\" type=\"button\" aria-label=\"Close\">&times;</button>",
-          "  <div class=\"poster-modal-image-wrap media-modal-body\">",
-          "  </div>",
-          "</div>"
-        ].join("");
+      <div>
+        <h3 class="footer-title">Support & Contact</h3>
+        <ul class="footer-links">
+          <li><a href="donate.html">Donate</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="mailto:ahlesunnatlondon@gmail.com">ahlesunnatlondon@gmail.com</a></li>
+        </ul>
+      </div>
+    </div>
 
-        const closeButton = mediaModal.querySelector(".media-modal-close");
-        const inner = mediaModal.querySelector(".media-modal-inner");
-        const body = mediaModal.querySelector(".media-modal-body");
+    <div class="container footer-bottom">
+      © <span class="js-year"></span> AHLE SUNNAT - LONDON, ON. All rights reserved.
+    </div>
+  </footer>
 
-        function closeModal() {
-          const modalVideo = body.querySelector("video");
-          if (modalVideo) modalVideo.pause();
-          body.innerHTML = "";
-          mediaModal.classList.remove("show");
-          document.body.classList.remove("modal-open");
-        }
+  <button class="back-to-top" id="backToTop" type="button" aria-label="Back to top">↑</button>
 
-        closeButton.addEventListener("click", closeModal);
-        mediaModal.addEventListener("click", (event) => {
-          if (!inner.contains(event.target)) {
-            closeModal();
-          }
-        });
-
-        document.addEventListener("keydown", (event) => {
-          if (event.key === "Escape" && mediaModal.classList.contains("show")) {
-            closeModal();
-          }
-        });
-
-        document.body.appendChild(mediaModal);
-        return mediaModal;
-      }
-
-      function openPosterModal(imageFile, title) {
-        const modal = ensureMediaModal();
-        const body = modal.querySelector(".media-modal-body");
-        body.innerHTML = "";
-
-        const image = document.createElement("img");
-        image.src = imageFile;
-        image.alt = title || "Poster preview";
-        image.className = "modal-poster-image";
-
-        body.appendChild(image);
-        modal.classList.add("show");
-        document.body.classList.add("modal-open");
-      }
-
-      function openVideoModal(videoFile, title, posterFile) {
-        const modal = ensureMediaModal();
-        const body = modal.querySelector(".media-modal-body");
-        body.innerHTML = "";
-
-        const video = document.createElement("video");
-        video.className = "modal-video-player";
-        video.controls = true;
-        video.preload = "metadata";
-        video.autoplay = false;
-        if (posterFile) video.poster = posterFile;
-        video.setAttribute("playsinline", "playsinline");
-        video.title = title || "Programme recording";
-
-        const source = document.createElement("source");
-        source.src = videoFile;
-        source.type = "video/mp4";
-        video.appendChild(source);
-        video.appendChild(makeMissing("Your browser cannot play this video file."));
-
-        video.addEventListener("error", () => {
-          body.innerHTML = "";
-          const note = makeMissing("Video could not be played on this device/browser.");
-          note.style.color = "var(--ink-700)";
-          const openLink = document.createElement("a");
-          openLink.href = videoFile;
-          openLink.className = "link-chip";
-          openLink.textContent = "Open Video File";
-          openLink.style.marginTop = "10px";
-          body.appendChild(note);
-          body.appendChild(openLink);
-        });
-
-        body.appendChild(video);
-        modal.classList.add("show");
-        document.body.classList.add("modal-open");
-      }
-
-      function makeMissing(text) {
-        const node = document.createElement("div");
-        node.className = "inline-note";
-        node.style.color = "#eed8a3";
-        node.textContent = text;
-        return node;
-      }
-
-      function renderVideos() {
-        if (!videos.length) {
-          videosGrid.innerHTML = '<div class="empty-state">No videos added yet.</div>';
-          return;
-        }
-
-        videos.forEach((item) => {
-          const card = document.createElement("article");
-          card.className = "card reveal";
-
-          const frame = document.createElement("div");
-          frame.className = "media-frame";
-
-          if (item.posterFile) {
-            const thumb = document.createElement("img");
-            thumb.className = "video-thumb";
-            thumb.src = item.posterFile;
-            thumb.alt = `${item.title || "Programme"} thumbnail`;
-            thumb.addEventListener("error", () => {
-              frame.innerHTML = "";
-              frame.appendChild(makeMissing("Thumbnail not found. Check poster file path."));
-            });
-            if (item.videoFile) {
-              thumb.addEventListener("click", () => {
-                openVideoModal(item.videoFile, item.title, item.posterFile);
-              });
-            }
-            frame.appendChild(thumb);
-          } else {
-            frame.appendChild(makeMissing("Thumbnail not available."));
-          }
-
-          const title = document.createElement("h3");
-          title.textContent = item.title || "Programme Video";
-
-          const meta = document.createElement("div");
-          meta.className = "meta-line";
-          meta.textContent = item.date || "Date not set";
-
-          const links = document.createElement("div");
-          links.className = "link-row";
-
-          if (item.videoFile) {
-            const playBtn = document.createElement("button");
-            playBtn.type = "button";
-            playBtn.className = "link-chip button-chip";
-            playBtn.textContent = "Play Video";
-            playBtn.addEventListener("click", () => {
-              openVideoModal(item.videoFile, item.title, item.posterFile);
-            });
-            links.appendChild(playBtn);
-          }
-
-          card.appendChild(frame);
-          card.appendChild(title);
-          card.appendChild(meta);
-          if (links.children.length) card.appendChild(links);
-          videosGrid.appendChild(card);
-        });
-      }
-
-      function renderPosters() {
-        if (!posters.length) {
-          postersGrid.innerHTML = '<div class="empty-state">No posters added yet.</div>';
-          return;
-        }
-
-        posters.forEach((item) => {
-          const card = document.createElement("article");
-          card.className = "card reveal";
-
-          const image = document.createElement("img");
-          image.className = "poster-thumb";
-          image.src = item.imageFile || "";
-          image.alt = item.title || "Programme poster";
-
-          image.addEventListener("error", () => {
-            image.src =
-              "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='480' height='600'%3E%3Crect width='100%25' height='100%25' fill='%23e8dcc3'/%3E%3Ctext x='50%25' y='48%25' font-size='26' text-anchor='middle' fill='%235e5a49' font-family='Arial'%3EPoster Not Found%3C/text%3E%3Ctext x='50%25' y='56%25' font-size='18' text-anchor='middle' fill='%235e5a49' font-family='Arial'%3ECheck file path%3C/text%3E%3C/svg%3E";
-          });
-          if (item.imageFile) {
-            image.addEventListener("click", () => {
-              openPosterModal(item.imageFile, item.title);
-            });
-          }
-
-          const title = document.createElement("h3");
-          title.textContent = item.title || "Programme Poster";
-
-          const meta = document.createElement("div");
-          meta.className = "meta-line";
-          meta.textContent = item.date || "Date not set";
-
-          card.appendChild(image);
-          card.appendChild(title);
-          card.appendChild(meta);
-
-          if (item.imageFile) {
-            const open = document.createElement("button");
-            open.type = "button";
-            open.className = "link-chip button-chip";
-            open.style.marginTop = "10px";
-            open.style.display = "inline-block";
-            open.textContent = "View Full Poster";
-            open.addEventListener("click", (event) => {
-              event.preventDefault();
-              openPosterModal(item.imageFile, item.title);
-            });
-            card.appendChild(open);
-          }
-
-          postersGrid.appendChild(card);
-        });
-      }
-
-      renderVideos();
-      renderPosters();
-
-      setTimeout(() => {
-        document.querySelectorAll(".reveal").forEach((item) => item.classList.add("show"));
-      }, 120);
-    })();
-  </script>
+  <script src="app.js?v=20260421-premium-1" defer></script>
+  <script src="programmes-data.js?v=20260421-premium-1" defer></script>
+  <script src="programmes.js?v=20260421-premium-1" defer></script>
 </body>
 </html>
-
-
-
-
