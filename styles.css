@@ -37,12 +37,6 @@ body {
   color: var(--ink-900);
   min-height: 100vh;
   background-color: #d5ddd2;
-  background:
-    linear-gradient(135deg, rgba(12, 36, 27, 0.64), rgba(19, 46, 35, 0.56)),
-    radial-gradient(circle at 18% 16%, rgba(217, 171, 85, 0.1), transparent 34%),
-    radial-gradient(circle at 86% 18%, rgba(31, 106, 84, 0.09), transparent 34%),
-    url("assets/madinah-hd.jpg") center 84% / cover no-repeat;
-  background-attachment: fixed, fixed, fixed, fixed;
   overflow-x: hidden;
   position: relative;
   opacity: 0;
@@ -51,7 +45,7 @@ body {
 
 body.page-ready {
   opacity: 1;
-  transform: translateY(0);
+  transform: none;
   transition: opacity 0.42s ease, transform 0.42s ease;
 }
 
@@ -69,12 +63,13 @@ body::before {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image:
-    linear-gradient(rgba(23, 81, 65, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(23, 81, 65, 0.04) 1px, transparent 1px);
-  background-size: 36px 36px;
-  opacity: 0.35;
-  mask-image: radial-gradient(circle at center, black 32%, transparent 90%);
+  background:
+    linear-gradient(135deg, rgba(12, 36, 27, 0.64), rgba(19, 46, 35, 0.56)),
+    radial-gradient(circle at 18% 16%, rgba(217, 171, 85, 0.1), transparent 34%),
+    radial-gradient(circle at 86% 18%, rgba(31, 106, 84, 0.09), transparent 34%),
+    url("assets/madinah-hd.jpg") center center / cover no-repeat;
+  background-attachment: fixed, fixed, fixed, fixed;
+  transform: translateZ(0);
   z-index: 0;
 }
 
@@ -1045,7 +1040,7 @@ body::after {
 
 .poster-modal-inner {
   width: min(1080px, calc(100vw - 24px));
-  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 16px);
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(23, 81, 65, 0.2);
   border-radius: 16px;
@@ -1083,7 +1078,7 @@ body::after {
 .poster-modal-image-wrap {
   width: 100%;
   height: 100%;
-  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 16px);
   overflow: hidden;
   display: grid;
   place-items: center;
@@ -1092,7 +1087,7 @@ body::after {
 
 .poster-modal-image-wrap img {
   max-width: min(100%, calc(100vw - 80px));
-  max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 102px);
   width: auto;
   height: auto;
   object-fit: contain;
@@ -1102,7 +1097,7 @@ body::after {
 
 .modal-video-player {
   width: min(100%, 980px);
-  max-height: calc(100vh - 120px);
+  max-height: calc(100dvh - 102px);
   border-radius: 12px;
   border: 1px solid rgba(23, 81, 65, 0.24);
   background: #0b1814;
@@ -1187,13 +1182,12 @@ body::after {
 }
 
 @media (max-width: 700px) {
-  body {
+  body::before {
     background-position:
       center center,
       18% 16%,
       86% 18%,
-      center 88%;
-    background-attachment: fixed, fixed, fixed, fixed;
+      center center;
   }
 
   body::after {
@@ -1208,20 +1202,23 @@ body::after {
   }
 
   .date-wrap {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 2px;
-  }
-
-  .date-wrap::-webkit-scrollbar {
-    display: none;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    overflow: visible;
+    padding-bottom: 0;
   }
 
   .date-pill {
+    width: 100%;
+    text-align: center;
     white-space: nowrap;
-    flex: 0 0 auto;
+    padding: 6px 8px;
+    font-size: 0.78rem;
+  }
+
+  .date-pill.prayer-countdown {
+    grid-column: 1 / -1;
   }
 
   .hero,
@@ -1273,24 +1270,26 @@ body::after {
   }
 
   .location-right-pill {
-    align-self: flex-end;
-    max-width: min(86vw, 320px);
+    align-self: stretch;
+    width: 100%;
+    max-width: 100%;
+    text-align: center;
     font-size: 0.8rem;
   }
 
   .poster-modal-inner {
     width: calc(100vw - 10px);
-    max-height: calc(100vh - 10px);
+    max-height: calc(100dvh - 10px);
   }
 
   .poster-modal-image-wrap {
-    max-height: calc(100vh - 10px);
+    max-height: calc(100dvh - 10px);
     padding: 46px 8px 8px;
   }
 
   .poster-modal-image-wrap img,
   .modal-video-player {
-    max-height: calc(100vh - 92px);
+    max-height: calc(100dvh - 92px);
     max-width: 100%;
   }
 }
