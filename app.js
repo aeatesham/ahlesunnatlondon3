@@ -441,7 +441,7 @@
       node.type = "button";
       node.id = "locationPill";
       node.className = "date-pill location-pill";
-      node.textContent = `📍 ${formatLocationLabel(getPrayerSettings())}`;
+      node.textContent = `${formatLocationLabel(getPrayerSettings())}`;
       if (countdownNode && countdownNode.parentElement === dateWrap) {
         dateWrap.insertBefore(node, countdownNode);
       } else {
@@ -461,7 +461,7 @@
     const node = ensureLocationNode();
     if (!node) return;
     const settings = getPrayerSettings();
-    node.textContent = `📍 ${formatLocationLabel(settings)}`;
+    node.textContent = `${formatLocationLabel(settings)}`;
   }
 
   function initLocationQuickEdit() {
