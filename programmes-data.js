@@ -1,14 +1,14 @@
 ﻿window.programmesVideos = [
   {
     title: "Eid 2026",
-    date: "March 20, 2026",
+    date: "Mar 20, 2026",
     videoFile: "assets/videos/eid-2026.MP4",
     posterFile: "assets/posters/eid-2026-prayer.JPG",
     youtubeUrl: ""
   },
   {
     title: "Ramadan Grand Iftar 2026",
-    date: "March 14, 2026",
+    date: "Mar 14, 2026",
     videoFile: "assets/videos/grand-iftar-2026.MP4",
     posterFile: "assets/posters/ramadan-grand-iftar-2026.JPG",
     youtubeUrl: ""

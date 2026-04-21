@@ -41,7 +41,8 @@ body {
     linear-gradient(135deg, rgba(12, 36, 27, 0.64), rgba(19, 46, 35, 0.56)),
     radial-gradient(circle at 18% 16%, rgba(217, 171, 85, 0.1), transparent 34%),
     radial-gradient(circle at 86% 18%, rgba(31, 106, 84, 0.09), transparent 34%),
-    url("assets/madinah-hd.jpg") center 80% / cover fixed no-repeat;
+    url("assets/madinah-hd.jpg") center 84% / cover no-repeat;
+  background-attachment: fixed, fixed, fixed, fixed;
   overflow-x: hidden;
   position: relative;
   opacity: 0;
@@ -57,6 +58,10 @@ body.page-ready {
 body.page-leave {
   opacity: 0;
   transform: translateY(8px);
+}
+
+body.modal-open {
+  overflow: hidden;
 }
 
 body::before {
@@ -647,13 +652,18 @@ body::after {
   background: linear-gradient(145deg, rgba(20, 71, 54, 0.22), rgba(191, 138, 46, 0.28));
 }
 
+.video-thumb,
+.poster-thumb {
+  cursor: zoom-in;
+}
+
 .meta-line {
   margin-top: 4px;
   color: var(--emerald-700);
   font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.03em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .link-chip {
@@ -1177,9 +1187,41 @@ body::after {
 }
 
 @media (max-width: 700px) {
+  body {
+    background-position:
+      center center,
+      18% 16%,
+      86% 18%,
+      center 88%;
+    background-attachment: fixed, fixed, fixed, fixed;
+  }
+
   body::after {
     background-size: min(72vw, 320px);
     opacity: 0.05;
+  }
+
+  .topbar-inner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .date-wrap {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .date-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .date-pill {
+    white-space: nowrap;
+    flex: 0 0 auto;
   }
 
   .hero,
@@ -1222,10 +1264,10 @@ body::after {
 
   .donation-popup {
     left: 50%;
-    top: 50%;
+    top: 78px;
     bottom: auto;
-    transform: translate(-50%, -50%);
-    animation: donationPulse 2.8s ease-in-out infinite;
+    transform: translateX(-50%);
+    animation: donationPulseTop 2.8s ease-in-out infinite;
     width: min(460px, calc(100vw - 16px));
     padding: 16px 14px 12px;
   }
@@ -1234,6 +1276,32 @@ body::after {
     align-self: flex-end;
     max-width: min(86vw, 320px);
     font-size: 0.8rem;
+  }
+
+  .poster-modal-inner {
+    width: calc(100vw - 10px);
+    max-height: calc(100vh - 10px);
+  }
+
+  .poster-modal-image-wrap {
+    max-height: calc(100vh - 10px);
+    padding: 46px 8px 8px;
+  }
+
+  .poster-modal-image-wrap img,
+  .modal-video-player {
+    max-height: calc(100vh - 92px);
+    max-width: 100%;
+  }
+}
+
+@keyframes donationPulseTop {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-3px);
   }
 }
 
