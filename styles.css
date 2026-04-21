@@ -243,6 +243,8 @@ body::after {
   filter: none;
   border-radius: 0;
   background: transparent;
+  transform: scale(1.14);
+  transform-origin: left center;
 }
 
 .brand small {
@@ -260,6 +262,10 @@ body::after {
   font-size: 1.3rem;
   letter-spacing: 0.03em;
   font-weight: 700;
+  display: inline-block;
+  line-height: 1;
+  transform: scale(1.1);
+  transform-origin: left center;
 }
 
 .brand-mobile-city {
@@ -1275,10 +1281,14 @@ body::after {
     line-height: 1.05;
     font-size: 1.02rem;
     letter-spacing: 0.02em;
+    transform: scale(1.06);
+    transform-origin: left center;
   }
 
   .brand img {
     height: 46px;
+    transform: scale(1.12);
+    transform-origin: left center;
   }
 
   .brand {

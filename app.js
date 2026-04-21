@@ -687,8 +687,9 @@
   }
 
   function initDonationPopup() {
-    // Show donation popup only on Home page loads.
-    if (!body.classList.contains("page-home")) return;
+    // Show on Home loads, and on reload for every page.
+    const navType = navigationType();
+    if (!body.classList.contains("page-home") && navType !== "reload") return;
     if (document.getElementById("donationPopup")) return;
 
     const popup = document.createElement("aside");
