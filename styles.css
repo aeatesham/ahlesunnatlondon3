@@ -135,7 +135,7 @@ body::after {
 
 .date-pill.location-pill {
   color: var(--ink-700);
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
   max-width: min(320px, 100%);
   white-space: nowrap;
