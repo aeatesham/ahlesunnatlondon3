@@ -35,6 +35,9 @@
   }
 
   const timingsCache = new Map();
+  const validPrayerNames = ["Fajr", "Sunrise", "Dahwa e Kubra", "Zuhr", "Asr", "Maghrib", "Isha"];
+  const urlParams = new URLSearchParams(window.location.search);
+  let pendingFocusPrayer = normalizePrayerName(urlParams.get("focus"));
 
   function two(num) {
     return String(num).padStart(2, "0");
@@ -62,6 +65,13 @@
 
   function isSameDate(a, b) {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  }
+
+  function normalizePrayerName(value) {
+    const incoming = String(value || "").trim().toLowerCase();
+    if (!incoming) return "";
+    const found = validPrayerNames.find((name) => name.toLowerCase() === incoming);
+    return found || "";
   }
 
   function getNowParts(timeZone) {
@@ -146,6 +156,7 @@
 
     rows.forEach(([name, value]) => {
       const tr = document.createElement("tr");
+      tr.dataset.prayerName = name;
       if (highlightCurrent && name === currentPrayerName) {
         tr.classList.add("prayer-row-current");
       }
@@ -166,6 +177,33 @@
       tr.appendChild(timeCell);
       prayerRows.appendChild(tr);
     });
+  }
+
+  function focusPrayerRow(prayerName) {
+    const normalized = normalizePrayerName(prayerName);
+    const allRows = Array.from(prayerRows.querySelectorAll("tr"));
+
+    let row = null;
+    if (normalized) {
+      row = allRows.find((item) => item.dataset.prayerName === normalized) || null;
+    }
+    if (!row) {
+      row = prayerRows.querySelector(".prayer-row-current");
+    }
+    if (!row) return;
+
+    row.classList.remove("prayer-row-blink");
+    void row.offsetWidth;
+    row.classList.add("prayer-row-blink");
+
+    row.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    window.setTimeout(() => {
+      row.classList.remove("prayer-row-blink");
+    }, 4200);
   }
 
   function syncControls(settings) {
@@ -221,6 +259,17 @@
     const selectedStatus = currentPrayerStatus(selectedTimes, nowParts);
     buildRows(selectedTimes, selectedStatus.current, highlightCurrent, madhab);
 
+    if (pendingFocusPrayer) {
+      focusPrayerRow(pendingFocusPrayer);
+      pendingFocusPrayer = "";
+      if (window.history && window.history.replaceState) {
+        const cleanUrl = new URL(window.location.href);
+        cleanUrl.searchParams.delete("focus");
+        cleanUrl.searchParams.delete("from");
+        window.history.replaceState({}, "", `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+      }
+    }
+
     setStatusMessage("", false);
   }
 
@@ -261,6 +310,12 @@
   });
 
   window.addEventListener("prayer-settings-changed", () => {
+    renderSelectedDate();
+  });
+
+  window.addEventListener("focus-current-prayer", (event) => {
+    const nextPrayer = normalizePrayerName(event?.detail?.prayer);
+    pendingFocusPrayer = nextPrayer || "Isha";
     renderSelectedDate();
   });
 

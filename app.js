@@ -13,6 +13,7 @@
     model: null,
     timezone: "America/Toronto",
     locationLabel: "London, Ontario",
+    currentPrayerName: "Isha",
     settingsKey: "",
     dateKey: "",
     loading: false,
@@ -269,6 +270,8 @@
     }
 
     return {
+      currentName,
+      nextName,
       currentLabel: prayerLabel(currentName, madhab),
       nextLabel: prayerLabel(nextName, madhab),
       secondsToNext
@@ -412,10 +415,14 @@
 
     let node = document.getElementById("prayerCountdown");
     if (!node) {
-      node = document.createElement("div");
+      node = document.createElement("button");
+      node.type = "button";
       node.id = "prayerCountdown";
       node.className = "date-pill prayer-countdown";
+      node.title = "Open Namaz Timing";
       node.textContent = "Loading prayer countdown...";
+      dateWrap.appendChild(node);
+    } else if (node.parentElement !== dateWrap) {
       dateWrap.appendChild(node);
     }
 
@@ -424,19 +431,28 @@
   }
 
   function ensureLocationNode() {
-    let node = document.getElementById("locationRightPill");
-    const topbarInner = document.querySelector(".topbar-inner");
-    if (!topbarInner) return null;
+    let node = document.getElementById("locationPill");
+    const dateWrap = document.querySelector(".date-wrap");
+    if (!dateWrap) return null;
+    const countdownNode = ensureCountdownNode();
 
     if (!node) {
       node = document.createElement("button");
       node.type = "button";
-      node.id = "locationRightPill";
-      node.className = "location-right-pill";
-      node.textContent = `Location: ${formatLocationLabel(getPrayerSettings())}`;
-      topbarInner.appendChild(node);
-    } else if (node.parentElement !== topbarInner) {
-      topbarInner.appendChild(node);
+      node.id = "locationPill";
+      node.className = "date-pill location-pill";
+      node.textContent = `📍 ${formatLocationLabel(getPrayerSettings())}`;
+      if (countdownNode && countdownNode.parentElement === dateWrap) {
+        dateWrap.insertBefore(node, countdownNode);
+      } else {
+        dateWrap.appendChild(node);
+      }
+    } else if (node.parentElement !== dateWrap) {
+      if (countdownNode && countdownNode.parentElement === dateWrap) {
+        dateWrap.insertBefore(node, countdownNode);
+      } else {
+        dateWrap.appendChild(node);
+      }
     }
     return node;
   }
@@ -445,7 +461,7 @@
     const node = ensureLocationNode();
     if (!node) return;
     const settings = getPrayerSettings();
-    node.textContent = `Location: ${formatLocationLabel(settings)}`;
+    node.textContent = `📍 ${formatLocationLabel(settings)}`;
   }
 
   function initLocationQuickEdit() {
@@ -469,6 +485,29 @@
 
       updatePrayerSettings({ city: nextCity, country: nextCountry });
     });
+  }
+
+  function focusRunningPrayerInNamazPage() {
+    const prayer = countdownState.currentPrayerName || "Isha";
+    window.dispatchEvent(new CustomEvent("focus-current-prayer", { detail: { prayer } }));
+  }
+
+  function openNamazTimingFromCountdown() {
+    const prayer = countdownState.currentPrayerName || "Isha";
+
+    if (body.classList.contains("page-namaz")) {
+      focusRunningPrayerInNamazPage();
+      return;
+    }
+
+    const targetUrl = new URL("namaz-timings.html", window.location.href);
+    targetUrl.searchParams.set("focus", prayer);
+    targetUrl.searchParams.set("from", "header");
+
+    body.classList.add("page-leave");
+    window.setTimeout(() => {
+      window.location.href = targetUrl.href;
+    }, 170);
   }
 
   function initMobileBrandText() {
@@ -506,6 +545,7 @@
 
     const activeTimings = settings.madhab === "shafi" ? countdownState.model.shafi : countdownState.model.hanafi;
     const status = getCurrentAndNext(activeTimings, nowParts, settings.madhab);
+    countdownState.currentPrayerName = status.currentName;
 
     node.textContent = `Now: ${status.currentLabel} | Next: ${status.nextLabel} in ${formatDuration(status.secondsToNext)}`;
   }
@@ -547,7 +587,13 @@
   }
 
   function initPrayerCountdown() {
-    if (!ensureCountdownNode()) return;
+    const node = ensureCountdownNode();
+    if (!node) return;
+
+    if (node.dataset.boundNav !== "1") {
+      node.dataset.boundNav = "1";
+      node.addEventListener("click", openNamazTimingFromCountdown);
+    }
 
     refreshCountdownModel(true);
     updateLocationNode();

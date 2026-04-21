@@ -133,35 +133,50 @@ body::after {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
 }
 
+.date-pill.location-pill {
+  color: var(--emerald-900);
+  cursor: pointer;
+  max-width: min(320px, 100%);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  appearance: none;
+}
+
+.date-pill.location-pill:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(24, 40, 33, 0.18);
+  border-color: rgba(191, 138, 46, 0.4);
+}
+
 .date-pill.prayer-countdown {
+  width: 100%;
+  flex: 1 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  appearance: none;
   color: #f5f2e5;
   background: linear-gradient(140deg, rgba(18, 59, 47, 0.94), rgba(22, 86, 66, 0.95));
   border-color: rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 18px rgba(17, 50, 40, 0.22);
 }
 
-.location-right-pill {
-  max-width: min(340px, calc(100vw - 24px));
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(23, 81, 65, 0.2);
-  background: rgba(255, 255, 255, 0.94);
-  color: var(--emerald-900);
-  font-size: 0.84rem;
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-shadow: 0 8px 20px rgba(24, 40, 33, 0.14);
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-  appearance: none;
-}
-
-.location-right-pill:hover {
+.date-pill.prayer-countdown:hover {
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(24, 40, 33, 0.18);
-  border-color: rgba(191, 138, 46, 0.4);
+  border-color: rgba(255, 235, 186, 0.44);
+}
+
+.date-pill.location-pill:focus-visible,
+.date-pill.prayer-countdown:focus-visible {
+  outline: 2px solid rgba(191, 138, 46, 0.8);
+  outline-offset: 2px;
 }
 
 .nav {
@@ -901,6 +916,20 @@ body::after {
     0 0 0 3px rgba(191, 138, 46, 0.22);
 }
 
+.prayer-row-blink td {
+  animation: prayerFocusBlink 1s ease-in-out 4;
+}
+
+@keyframes prayerFocusBlink {
+  0%,
+  100% {
+    background: rgba(255, 240, 206, 0.95);
+  }
+  50% {
+    background: rgba(255, 223, 156, 0.98);
+  }
+}
+
 .inline-note {
   color: var(--ink-700);
   font-size: 0.92rem;
@@ -1269,10 +1298,8 @@ body::after {
     padding: 16px 14px 12px;
   }
 
-  .location-right-pill {
-    align-self: stretch;
+  .date-pill.location-pill {
     width: 100%;
-    max-width: 100%;
     text-align: center;
     font-size: 0.8rem;
   }
